@@ -270,9 +270,22 @@ npm run dev:all
 
 The website owner dashboard provides comprehensive management capabilities for all organizations and tenants.
 
-1. **Create Owner Account:**
+1. **Access with Default Credentials:**
+
+   A default owner account is automatically created on first server startup:
+   - **Email:** `admin`
+   - **Password:** `admin`
+
+   **⚠️ IMPORTANT:** Change these credentials immediately in production!
+
+2. **Access Owner Dashboard:**
+   - Visit `/owner/login` or click "SuperAdmin Portal" in the homepage footer
+   - Login with credentials (default: admin/admin)
+   - Access the comprehensive admin portal
+
+3. **Create Additional Owner Accounts (Optional):**
    ```bash
-   # Use the API to create the first owner account
+   # Use the API to create additional owner accounts
    curl -X POST http://localhost:5000/api/owners/register \
      -H "Content-Type: application/json" \
      -d '{
@@ -284,25 +297,20 @@ The website owner dashboard provides comprehensive management capabilities for a
      }'
    ```
 
-2. **Access Owner Dashboard:**
-   - Visit `/owner/login`
-   - Login with owner credentials
-   - Access the comprehensive admin portal
-
-3. **Manage Organizations:**
+4. **Manage Organizations:**
    - View all registered organizations
    - Monitor organization statistics (meetings, registrants, sync rates)
    - Activate/deactivate organization accounts
    - View detailed organization information
    - Delete organizations (with all related data)
 
-4. **System Overview:**
+5. **System Overview:**
    - View system-wide statistics
    - Monitor registration trends
    - Track Zoom sync success rates
    - Identify top-performing organizations
 
-5. **Data Management:**
+6. **Data Management:**
    - View all meetings across all organizations
    - Access all registrant data
    - Filter and search across tenants
