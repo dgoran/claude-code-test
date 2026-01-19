@@ -139,8 +139,9 @@ See [DOCKER.md](DOCKER.md) for detailed Docker documentation.
 
 ### Backend Setup
 
-1. **Install dependencies:**
+1. **Navigate to backend directory and install dependencies:**
    ```bash
+   cd backend
    npm install
    ```
 
@@ -203,8 +204,17 @@ The application will open at `http://localhost:3000`
 
 From the root directory:
 ```bash
+# First, install root dependencies (includes concurrently)
+npm install
+
+# Then run both services
 npm run dev:all
 ```
+
+**Note:** This requires dependencies to be installed in all three locations:
+- Root directory: `npm install`
+- Backend: `cd backend && npm install`
+- Frontend: `cd client && npm install`
 
 ## Zoom API Configuration
 
