@@ -9,7 +9,7 @@ const meetingRoutes = require('./routes/meetings');
 const registrantRoutes = require('./routes/registrants');
 
 // Validate required environment variables
-if (!process.env.JWT_SECRET) {
+if (!process.env.JWT_SECRET || process.env.JWT_SECRET.trim() === '') {
   console.error('❌ FATAL ERROR: JWT_SECRET is not defined in environment variables!');
   console.error('📝 Please create a .env file based on .env.example and set JWT_SECRET');
   console.error('   Run: cp .env.example .env');
