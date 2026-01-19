@@ -145,6 +145,13 @@ See [DOCKER.md](DOCKER.md) for detailed Docker documentation.
    ```
 
 2. **Create environment file:**
+
+   **Quick Setup (Recommended):**
+   ```bash
+   ./setup.sh
+   ```
+
+   **Manual Setup:**
    ```bash
    cp .env.example .env
    ```

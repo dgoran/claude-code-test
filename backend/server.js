@@ -8,6 +8,15 @@ const organizationRoutes = require('./routes/organizations');
 const meetingRoutes = require('./routes/meetings');
 const registrantRoutes = require('./routes/registrants');
 
+// Validate required environment variables
+if (!process.env.JWT_SECRET) {
+  console.error('❌ FATAL ERROR: JWT_SECRET is not defined in environment variables!');
+  console.error('📝 Please create a .env file based on .env.example and set JWT_SECRET');
+  console.error('   Run: cp .env.example .env');
+  console.error('   Then edit .env and set a secure JWT_SECRET value');
+  process.exit(1);
+}
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
