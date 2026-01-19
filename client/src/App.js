@@ -13,6 +13,17 @@ import LandingPage from './pages/LandingPage';
 import RegistrationForm from './pages/RegistrationForm';
 import PrivateRoute from './components/PrivateRoute';
 
+// Owner Portal Components
+import OwnerLogin from './pages/OwnerLogin';
+import OwnerDashboard from './pages/OwnerDashboard';
+import OwnerOrganizations from './pages/OwnerOrganizations';
+import OwnerOrganizationDetails from './pages/OwnerOrganizationDetails';
+import OwnerAllMeetings from './pages/OwnerAllMeetings';
+import OwnerAllRegistrants from './pages/OwnerAllRegistrants';
+import OwnerPrivateRoute from './components/OwnerPrivateRoute';
+import OwnerNavbar from './components/OwnerNavbar';
+import Navbar from './components/Navbar';
+
 function App() {
   return (
     <Router>
@@ -21,13 +32,21 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
 
-        {/* Protected Admin Routes */}
-        <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-        <Route path="/meetings" element={<PrivateRoute><Meetings /></PrivateRoute>} />
-        <Route path="/meetings/create" element={<PrivateRoute><CreateMeeting /></PrivateRoute>} />
-        <Route path="/meetings/:id/edit" element={<PrivateRoute><EditMeeting /></PrivateRoute>} />
-        <Route path="/meetings/:id" element={<PrivateRoute><MeetingDetails /></PrivateRoute>} />
-        <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
+        {/* Protected Organization Routes */}
+        <Route path="/dashboard" element={<PrivateRoute><><Navbar /><Dashboard /></></PrivateRoute>} />
+        <Route path="/meetings" element={<PrivateRoute><><Navbar /><Meetings /></></PrivateRoute>} />
+        <Route path="/meetings/create" element={<PrivateRoute><><Navbar /><CreateMeeting /></></PrivateRoute>} />
+        <Route path="/meetings/:id/edit" element={<PrivateRoute><><Navbar /><EditMeeting /></></PrivateRoute>} />
+        <Route path="/meetings/:id" element={<PrivateRoute><><Navbar /><MeetingDetails /></></PrivateRoute>} />
+        <Route path="/settings" element={<PrivateRoute><><Navbar /><Settings /></></PrivateRoute>} />
+
+        {/* Owner Portal Routes */}
+        <Route path="/owner/login" element={<OwnerLogin />} />
+        <Route path="/owner/dashboard" element={<OwnerPrivateRoute><><OwnerNavbar /><OwnerDashboard /></></OwnerPrivateRoute>} />
+        <Route path="/owner/organizations" element={<OwnerPrivateRoute><><OwnerNavbar /><OwnerOrganizations /></></OwnerPrivateRoute>} />
+        <Route path="/owner/organizations/:id" element={<OwnerPrivateRoute><><OwnerNavbar /><OwnerOrganizationDetails /></></OwnerPrivateRoute>} />
+        <Route path="/owner/meetings" element={<OwnerPrivateRoute><><OwnerNavbar /><OwnerAllMeetings /></></OwnerPrivateRoute>} />
+        <Route path="/owner/registrants" element={<OwnerPrivateRoute><><OwnerNavbar /><OwnerAllRegistrants /></></OwnerPrivateRoute>} />
 
         {/* Public Landing and Registration Pages */}
         <Route path="/:subdomain/:meetingId" element={<LandingPage />} />
