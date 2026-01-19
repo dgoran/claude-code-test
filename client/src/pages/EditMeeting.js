@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import FormBuilder from '../components/FormBuilder';
-import { createMeeting } from '../utils/api';
+import { getMeeting, updateMeeting } from '../utils/api';
 import { getOrganization } from '../utils/auth';
 import './CreateMeeting.css';
 
-const CreateMeeting = () => {
+const EditMeeting = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
   const organization = getOrganization();
   const [formData, setFormData] = useState({
     meetingName: '',
@@ -18,15 +19,54 @@ const CreateMeeting = () => {
     timezone: 'UTC',
     landingPageTitle: '',
     landingPageDescription: '',
-    createInZoom: true
+    isActive: true
   });
-  const [formFields, setFormFields] = useState([
-    // Default required fields
-    { fieldName: 'firstName', fieldLabel: 'First Name', fieldType: 'text', isRequired: true, isStandardZoomField: true, zoomFieldKey: 'first_name', options: [], order: 0 },
-    { fieldName: 'email', fieldLabel: 'Email', fieldType: 'email', isRequired: true, isStandardZoomField: true, zoomFieldKey: 'email', options: [], order: 1 }
-  ]);
+  const [formFields, setFormFields] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [fetchingMeeting, setFetchingMeeting] = useState(true);
+
+  useEffect(() => {
+    const fetchMeeting = async () => {
+      try {
+        const response = await getMeeting(id);
+        const meeting = response.data.meeting;
+
+        // Format the date for datetime-local input
+        const startTime = meeting.startTime
+          ? new Date(meeting.startTime).toISOString().slice(0, 16)
+          : '';
+
+        setFormData({
+          meetingName: meeting.meetingName || '',
+          meetingType: meeting.meetingType || 'meeting',
+          description: meeting.description || '',
+          startTime,
+          duration: meeting.duration || 60,
+          timezone: meeting.timezone || 'UTC',
+          landingPageTitle: meeting.landingPageTitle || '',
+          landingPageDescription: meeting.landingPageDescription || '',
+          isActive: meeting.isActive !== undefined ? meeting.isActive : true
+        });
+
+        // Set form fields or default to basic fields
+        if (meeting.formFields && meeting.formFields.length > 0) {
+          setFormFields(meeting.formFields);
+        } else {
+          setFormFields([
+            { fieldName: 'firstName', fieldLabel: 'First Name', fieldType: 'text', isRequired: true, isStandardZoomField: true, zoomFieldKey: 'first_name', options: [], order: 0 },
+            { fieldName: 'email', fieldLabel: 'Email', fieldType: 'email', isRequired: true, isStandardZoomField: true, zoomFieldKey: 'email', options: [], order: 1 }
+          ]);
+        }
+      } catch (err) {
+        setError('Failed to load meeting details');
+      } finally {
+        setFetchingMeeting(false);
+      }
+    };
+
+    fetchMeeting();
+  }, [id]);
 
   const handleChange = (e) => {
     const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
@@ -45,34 +85,40 @@ const CreateMeeting = () => {
       return;
     }
 
-    if (formData.createInZoom && !organization?.hasZoomCredentials) {
-      setError('Please add Zoom API credentials in Settings before creating meetings in Zoom');
-      return;
-    }
-
     setLoading(true);
 
     try {
-      const response = await createMeeting({
+      await updateMeeting(id, {
         ...formData,
-        landingPageTitle: formData.landingPageTitle || formData.meetingName,
-        landingPageDescription: formData.landingPageDescription || formData.description,
         formFields
       });
 
-      navigate(`/meetings/${response.data.meeting._id}`);
+      navigate(`/meetings/${id}`);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to create meeting. Please try again.');
+      setError(err.response?.data?.error || 'Failed to update meeting. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
+  if (fetchingMeeting) {
+    return (
+      <>
+        <Navbar />
+        <div className="container">
+          <div className="card">
+            <p>Loading meeting details...</p>
+          </div>
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
       <Navbar />
       <div className="container">
-        <h1>Create New Meeting/Webinar</h1>
+        <h1>Edit Meeting/Webinar</h1>
 
         {error && <div className="alert alert-error">{error}</div>}
 
@@ -189,17 +235,12 @@ const CreateMeeting = () => {
               <label className="checkbox-label">
                 <input
                   type="checkbox"
-                  name="createInZoom"
-                  checked={formData.createInZoom}
+                  name="isActive"
+                  checked={formData.isActive}
                   onChange={handleChange}
                 />
-                <span>Create this meeting in Zoom automatically</span>
+                <span>Meeting is active</span>
               </label>
-              {!organization?.hasZoomCredentials && (
-                <p className="form-hint">
-                  Note: Add Zoom API credentials in Settings to enable this feature
-                </p>
-              )}
             </div>
 
             <h3>Registration Form Configuration</h3>
@@ -208,13 +249,13 @@ const CreateMeeting = () => {
             <div className="form-actions">
               <button
                 type="button"
-                onClick={() => navigate('/meetings')}
+                onClick={() => navigate(`/meetings/${id}`)}
                 className="btn btn-secondary"
               >
                 Cancel
               </button>
               <button type="submit" className="btn btn-primary" disabled={loading}>
-                {loading ? 'Creating...' : 'Create Meeting'}
+                {loading ? 'Updating...' : 'Update Meeting'}
               </button>
             </div>
           </form>
@@ -224,4 +265,4 @@ const CreateMeeting = () => {
   );
 };
 
-export default CreateMeeting;
+export default EditMeeting;

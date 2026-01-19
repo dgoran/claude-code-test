@@ -16,8 +16,18 @@ router.post('/register', async (req, res) => {
       lastName,
       email,
       phone,
+      address,
+      city,
+      country,
+      zipCode,
+      state,
       company,
       jobTitle,
+      industry,
+      purchasingTimeFrame,
+      roleInPurchaseProcess,
+      numberOfEmployees,
+      comments,
       customFields
     } = req.body;
 
@@ -65,8 +75,18 @@ router.post('/register', async (req, res) => {
       lastName,
       email: email.toLowerCase(),
       phone: phone || '',
+      address: address || '',
+      city: city || '',
+      country: country || '',
+      zipCode: zipCode || '',
+      state: state || '',
       company: company || '',
       jobTitle: jobTitle || '',
+      industry: industry || '',
+      purchasingTimeFrame: purchasingTimeFrame || '',
+      roleInPurchaseProcess: roleInPurchaseProcess || '',
+      numberOfEmployees: numberOfEmployees || '',
+      comments: comments || '',
       customFields: customFields || {}
     });
 
@@ -84,8 +104,18 @@ router.post('/register', async (req, res) => {
           first_name: firstName,
           last_name: lastName,
           phone: phone || '',
+          address: address || '',
+          city: city || '',
+          country: country || '',
+          zip: zipCode || '',
+          state: state || '',
           company: company || '',
-          job_title: jobTitle || ''
+          job_title: jobTitle || '',
+          industry: industry || '',
+          purchasing_time_frame: purchasingTimeFrame || '',
+          role_in_purchase_process: roleInPurchaseProcess || '',
+          no_of_employees: numberOfEmployees || '',
+          comments: comments || ''
         };
 
         let zoomResponse;
@@ -197,8 +227,18 @@ router.post('/:id/sync', authMiddleware, async (req, res) => {
       first_name: registrant.firstName,
       last_name: registrant.lastName,
       phone: registrant.phone,
+      address: registrant.address,
+      city: registrant.city,
+      country: registrant.country,
+      zip: registrant.zipCode,
+      state: registrant.state,
       company: registrant.company,
-      job_title: registrant.jobTitle
+      job_title: registrant.jobTitle,
+      industry: registrant.industry,
+      purchasing_time_frame: registrant.purchasingTimeFrame,
+      role_in_purchase_process: registrant.roleInPurchaseProcess,
+      no_of_employees: registrant.numberOfEmployees,
+      comments: registrant.comments
     };
 
     let zoomResponse;

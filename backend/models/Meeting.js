@@ -44,6 +44,40 @@ const meetingSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  formFields: [{
+    fieldName: {
+      type: String,
+      required: true
+    },
+    fieldLabel: {
+      type: String,
+      required: true
+    },
+    fieldType: {
+      type: String,
+      enum: ['text', 'email', 'tel', 'textarea', 'select'],
+      default: 'text'
+    },
+    isRequired: {
+      type: Boolean,
+      default: false
+    },
+    isStandardZoomField: {
+      type: Boolean,
+      default: false
+    },
+    zoomFieldKey: {
+      type: String,
+      default: ''
+    },
+    options: [{
+      type: String
+    }],
+    order: {
+      type: Number,
+      default: 0
+    }
+  }],
   isActive: {
     type: Boolean,
     default: true

@@ -122,6 +122,9 @@ const MeetingDetails = () => {
               {meeting.duration} minutes
             </p>
           </div>
+          <button onClick={() => navigate(`/meetings/${id}/edit`)} className="btn btn-primary">
+            Edit Meeting
+          </button>
         </div>
 
         <div className="card">

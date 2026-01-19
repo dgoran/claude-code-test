@@ -115,16 +115,30 @@ class ZoomService {
     try {
       const token = await this.getAccessToken();
 
+      const payload = {
+        email: registrantData.email,
+        first_name: registrantData.first_name,
+        last_name: registrantData.last_name
+      };
+
+      // Add optional fields if they exist
+      if (registrantData.phone) payload.phone = registrantData.phone;
+      if (registrantData.address) payload.address = registrantData.address;
+      if (registrantData.city) payload.city = registrantData.city;
+      if (registrantData.country) payload.country = registrantData.country;
+      if (registrantData.zip) payload.zip = registrantData.zip;
+      if (registrantData.state) payload.state = registrantData.state;
+      if (registrantData.company) payload.org = registrantData.company;
+      if (registrantData.job_title) payload.job_title = registrantData.job_title;
+      if (registrantData.industry) payload.industry = registrantData.industry;
+      if (registrantData.purchasing_time_frame) payload.purchasing_time_frame = registrantData.purchasing_time_frame;
+      if (registrantData.role_in_purchase_process) payload.role_in_purchase_process = registrantData.role_in_purchase_process;
+      if (registrantData.no_of_employees) payload.no_of_employees = registrantData.no_of_employees;
+      if (registrantData.comments) payload.comments = registrantData.comments;
+
       const response = await axios.post(
         `https://api.zoom.us/v2/meetings/${meetingId}/registrants`,
-        {
-          email: registrantData.email,
-          first_name: registrantData.first_name,
-          last_name: registrantData.last_name,
-          phone: registrantData.phone || '',
-          org: registrantData.company || '',
-          job_title: registrantData.job_title || ''
-        },
+        payload,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -145,16 +159,30 @@ class ZoomService {
     try {
       const token = await this.getAccessToken();
 
+      const payload = {
+        email: registrantData.email,
+        first_name: registrantData.first_name,
+        last_name: registrantData.last_name
+      };
+
+      // Add optional fields if they exist
+      if (registrantData.phone) payload.phone = registrantData.phone;
+      if (registrantData.address) payload.address = registrantData.address;
+      if (registrantData.city) payload.city = registrantData.city;
+      if (registrantData.country) payload.country = registrantData.country;
+      if (registrantData.zip) payload.zip = registrantData.zip;
+      if (registrantData.state) payload.state = registrantData.state;
+      if (registrantData.company) payload.org = registrantData.company;
+      if (registrantData.job_title) payload.job_title = registrantData.job_title;
+      if (registrantData.industry) payload.industry = registrantData.industry;
+      if (registrantData.purchasing_time_frame) payload.purchasing_time_frame = registrantData.purchasing_time_frame;
+      if (registrantData.role_in_purchase_process) payload.role_in_purchase_process = registrantData.role_in_purchase_process;
+      if (registrantData.no_of_employees) payload.no_of_employees = registrantData.no_of_employees;
+      if (registrantData.comments) payload.comments = registrantData.comments;
+
       const response = await axios.post(
         `https://api.zoom.us/v2/webinars/${webinarId}/registrants`,
-        {
-          email: registrantData.email,
-          first_name: registrantData.first_name,
-          last_name: registrantData.last_name,
-          phone: registrantData.phone || '',
-          org: registrantData.company || '',
-          job_title: registrantData.job_title || ''
-        },
+        payload,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
