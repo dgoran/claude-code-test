@@ -11,6 +11,30 @@ A comprehensive multi-tenant web application for managing Zoom meeting and webin
 - **Admin Panel**: Secure management of organization settings and Zoom API credentials
 - **Real-time Sync**: Instant synchronization of registrants to Zoom's registration database
 
+## 🚀 Quick Start with Docker (Recommended)
+
+The fastest way to run the application locally:
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/zoom-registration-app.git
+cd zoom-registration-app
+
+# Start everything with one command
+docker compose up -d
+
+# Access the application
+# Frontend: http://localhost:3000
+# Backend API: http://localhost:5000
+```
+
+That's it! MongoDB, Backend, and Frontend are now running.
+
+📖 **Detailed Docker Guide**: See [DOCKER.md](DOCKER.md) for complete Docker documentation
+🚀 **Production Deployment**: See [DEPLOYMENT.md](DEPLOYMENT.md) for Digital Ocean deployment
+
+---
+
 ## Technology Stack
 
 ### Backend
@@ -25,6 +49,12 @@ A comprehensive multi-tenant web application for managing Zoom meeting and webin
 - React Router for navigation
 - Axios for API calls
 - CSS3 with modern styling
+
+### DevOps
+- Docker & Docker Compose
+- Nginx (production)
+- Multi-stage builds
+- Health checks
 
 ## Project Structure
 
@@ -71,9 +101,41 @@ zoom-registration-app/
 
 ### Prerequisites
 
+**Option 1: Docker (Recommended)**
+- Docker and Docker Compose installed
+- No other dependencies needed!
+
+**Option 2: Manual Installation**
 - Node.js (v14 or higher)
-- MongoDB (v4.4 or higher)
+- MongoDB (v4.4 or higher) or MongoDB Atlas account
 - Zoom Account with Server-to-Server OAuth app
+
+---
+
+### Option 1: Docker Installation (Recommended)
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/yourusername/zoom-registration-app.git
+cd zoom-registration-app
+
+# 2. Start all services
+docker compose up -d
+
+# 3. View logs
+docker compose logs -f
+
+# 4. Stop services
+docker compose down
+```
+
+**Done!** Access the app at http://localhost:3000
+
+See [DOCKER.md](DOCKER.md) for detailed Docker documentation.
+
+---
+
+### Option 2: Manual Installation
 
 ### Backend Setup
 
@@ -337,14 +399,41 @@ The build folder will contain optimized production files.
 
 ## Deployment
 
-### Backend Deployment
+### 🚀 Quick Deploy to Digital Ocean
+
+See the comprehensive **[DEPLOYMENT.md](DEPLOYMENT.md)** guide for:
+
+- **Docker deployment** to Digital Ocean Droplet
+- **App Platform** deployment
+- **SSL/TLS** configuration with Let's Encrypt
+- **Environment variables** setup
+- **Monitoring** and maintenance
+- **Backup** and restore procedures
+
+### Docker Production Deployment
+
+```bash
+# 1. Set up production environment variables
+cp .env.example .env
+nano .env  # Edit with production values
+
+# 2. Deploy with production compose file
+docker compose -f docker-compose.prod.yml up -d --build
+
+# 3. View logs
+docker compose -f docker-compose.prod.yml logs -f
+```
+
+### Manual Deployment
+
+#### Backend Deployment
 
 1. Set up MongoDB database (MongoDB Atlas recommended)
 2. Configure environment variables
 3. Deploy to hosting service (Heroku, AWS, DigitalOcean, etc.)
 4. Ensure MongoDB connection string is set
 
-### Frontend Deployment
+#### Frontend Deployment
 
 1. Build the React app: `npm run build`
 2. Deploy to static hosting (Netlify, Vercel, AWS S3, etc.)
@@ -358,7 +447,12 @@ PORT=5000
 MONGODB_URI=your_production_mongodb_uri
 JWT_SECRET=your_secure_production_secret
 CLIENT_URL=your_production_frontend_url
+MONGO_ROOT_USERNAME=admin
+MONGO_ROOT_PASSWORD=secure_password
+REACT_APP_API_URL=https://api.your-domain.com
 ```
+
+**📖 Complete deployment guide**: [DEPLOYMENT.md](DEPLOYMENT.md)
 
 ## Troubleshooting
 
