@@ -9,6 +9,7 @@ const meetingRoutes = require('./routes/meetings');
 const registrantRoutes = require('./routes/registrants');
 const ownerRoutes = require('./routes/owners');
 const adminRoutes = require('./routes/admin');
+const setupDefaultOwner = require('./utils/setupDefaultOwner');
 
 // Validate required environment variables
 if (!process.env.JWT_SECRET || process.env.JWT_SECRET.trim() === '') {
@@ -57,6 +58,9 @@ const startServer = async () => {
     });
 
     console.log('✓ Connected to MongoDB');
+
+    // Setup default owner account if none exists
+    await setupDefaultOwner();
 
     app.listen(PORT, () => {
       console.log(`✓ Server is running on port ${PORT}`);

@@ -79,6 +79,21 @@ const Home = () => {
             </div>
           </div>
         </div>
+
+        {/* Footer with SuperAdmin Link */}
+        <footer className="home-footer">
+          <div className="footer-content">
+            <div className="footer-links">
+              <Link to="/owner/login" className="superadmin-link">
+                <span className="superadmin-icon">🔐</span>
+                <span>SuperAdmin Portal</span>
+              </Link>
+            </div>
+            <p className="footer-copyright">
+              © 2024 Zoom Registration Platform. All rights reserved.
+            </p>
+          </div>
+        </footer>
       </div>
     </>
   );

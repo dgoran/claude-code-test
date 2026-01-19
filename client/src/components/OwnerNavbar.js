@@ -22,6 +22,7 @@ function OwnerNavbar() {
         <Link to="/owner/organizations" className="navbar-item">Organizations</Link>
         <Link to="/owner/meetings" className="navbar-item">All Meetings</Link>
         <Link to="/owner/registrants" className="navbar-item">All Registrants</Link>
+        <Link to="/owner/profile" className="navbar-item">Profile</Link>
         <div className="navbar-user">
           <span className="user-name">{ownerData?.name} (Owner)</span>
           <button onClick={handleLogout} className="logout-button">
