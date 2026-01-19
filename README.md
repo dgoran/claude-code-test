@@ -5,11 +5,13 @@ A comprehensive multi-tenant web application for managing Zoom meeting and webin
 ## Features
 
 - **Multi-Tenant Architecture**: Each organization gets their own subdomain and isolated data
+- **Website Owner Dashboard**: Comprehensive admin portal to manage all tenants and organizations
 - **Zoom API Integration**: Automatically sync registrants to Zoom meetings and webinars
 - **Custom Landing Pages**: Beautiful, customizable landing pages for each event
 - **Registration Management**: View, manage, and export registrants from a central dashboard
-- **Admin Panel**: Secure management of organization settings and Zoom API credentials
+- **Organization Admin Panel**: Secure management of organization settings and Zoom API credentials
 - **Real-time Sync**: Instant synchronization of registrants to Zoom's registration database
+- **Analytics & Reporting**: System-wide statistics and organization-level metrics
 
 ## 🚀 Quick Start with Docker (Recommended)
 
@@ -64,19 +66,25 @@ zoom-registration-app/
 │   ├── models/              # MongoDB models
 │   │   ├── Organization.js  # Organization schema
 │   │   ├── Meeting.js       # Meeting/Webinar schema
-│   │   └── Registrant.js    # Registrant schema
+│   │   ├── Registrant.js    # Registrant schema
+│   │   └── Owner.js         # Owner/Admin schema
 │   ├── routes/              # API routes
 │   │   ├── organizations.js # Organization endpoints
 │   │   ├── meetings.js      # Meeting endpoints
-│   │   └── registrants.js   # Registrant endpoints
+│   │   ├── registrants.js   # Registrant endpoints
+│   │   ├── owners.js        # Owner authentication
+│   │   └── admin.js         # Admin/Owner endpoints
 │   ├── services/            # Business logic
 │   │   └── zoomService.js   # Zoom API integration
 │   ├── middleware/          # Express middleware
-│   │   └── auth.js          # JWT authentication
+│   │   ├── auth.js          # JWT authentication
+│   │   └── ownerAuth.js     # Owner authentication
 │   └── server.js            # Express server setup
 ├── client/
 │   ├── src/
 │   │   ├── components/      # Reusable components
+│   │   │   ├── Navbar.js    # Organization navbar
+│   │   │   └── OwnerNavbar.js # Owner portal navbar
 │   │   ├── pages/           # Page components
 │   │   │   ├── Home.js      # Landing page
 │   │   │   ├── Register.js  # Organization signup
@@ -87,10 +95,17 @@ zoom-registration-app/
 │   │   │   ├── MeetingDetails.js
 │   │   │   ├── Settings.js  # Zoom API settings
 │   │   │   ├── LandingPage.js # Public event page
-│   │   │   └── RegistrationForm.js # Public registration
+│   │   │   ├── RegistrationForm.js # Public registration
+│   │   │   ├── OwnerLogin.js # Owner login
+│   │   │   ├── OwnerDashboard.js # Owner dashboard
+│   │   │   ├── OwnerOrganizations.js # Manage all orgs
+│   │   │   ├── OwnerOrganizationDetails.js # Org details
+│   │   │   ├── OwnerAllMeetings.js # All meetings
+│   │   │   └── OwnerAllRegistrants.js # All registrants
 │   │   ├── utils/           # Utility functions
 │   │   │   ├── api.js       # API client
-│   │   │   └── auth.js      # Auth helpers
+│   │   │   ├── auth.js      # Auth helpers
+│   │   │   └── ownerAuth.js # Owner auth helpers
 │   │   ├── App.js           # Main app component
 │   │   └── index.js         # Entry point
 │   └── public/
@@ -251,6 +266,56 @@ npm run dev:all
 
 ## Usage Guide
 
+### For Website Owners (Super Admin)
+
+The website owner dashboard provides comprehensive management capabilities for all organizations and tenants.
+
+1. **Create Owner Account:**
+   ```bash
+   # Use the API to create the first owner account
+   curl -X POST http://localhost:5000/api/owners/register \
+     -H "Content-Type: application/json" \
+     -d '{
+       "name": "Admin Name",
+       "email": "admin@example.com",
+       "password": "secure_password",
+       "role": "owner",
+       "secretKey": "your_owner_registration_secret_here"
+     }'
+   ```
+
+2. **Access Owner Dashboard:**
+   - Visit `/owner/login`
+   - Login with owner credentials
+   - Access the comprehensive admin portal
+
+3. **Manage Organizations:**
+   - View all registered organizations
+   - Monitor organization statistics (meetings, registrants, sync rates)
+   - Activate/deactivate organization accounts
+   - View detailed organization information
+   - Delete organizations (with all related data)
+
+4. **System Overview:**
+   - View system-wide statistics
+   - Monitor registration trends
+   - Track Zoom sync success rates
+   - Identify top-performing organizations
+
+5. **Data Management:**
+   - View all meetings across all organizations
+   - Access all registrant data
+   - Filter and search across tenants
+   - Export data for reporting
+
+**Owner Portal Routes:**
+- `/owner/login` - Owner authentication
+- `/owner/dashboard` - Main dashboard with statistics
+- `/owner/organizations` - Manage all organizations
+- `/owner/organizations/:id` - Organization details
+- `/owner/meetings` - View all meetings
+- `/owner/registrants` - View all registrants
+
 ### For Organization Owners
 
 1. **Create Account:**
@@ -298,6 +363,24 @@ npm run dev:all
    - Check email for details
 
 ## API Endpoints
+
+### Owner/Admin Endpoints
+
+- `POST /api/owners/register` - Register new owner (requires secret key)
+- `POST /api/owners/login` - Owner login
+- `GET /api/owners/profile` - Get owner profile (authenticated)
+- `PUT /api/owners/profile` - Update owner profile (authenticated)
+- `PUT /api/owners/password` - Change owner password (authenticated)
+
+### Admin Management Endpoints
+
+- `GET /api/admin/stats` - Get system-wide statistics (owner only)
+- `GET /api/admin/organizations` - Get all organizations with stats (owner only)
+- `GET /api/admin/organizations/:id` - Get organization details (owner only)
+- `PUT /api/admin/organizations/:id` - Update organization (owner only)
+- `DELETE /api/admin/organizations/:id` - Delete organization (owner only)
+- `GET /api/admin/meetings` - Get all meetings across organizations (owner only)
+- `GET /api/admin/registrants` - Get all registrants across organizations (owner only)
 
 ### Organizations
 

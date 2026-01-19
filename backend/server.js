@@ -7,6 +7,8 @@ const bodyParser = require('body-parser');
 const organizationRoutes = require('./routes/organizations');
 const meetingRoutes = require('./routes/meetings');
 const registrantRoutes = require('./routes/registrants');
+const ownerRoutes = require('./routes/owners');
+const adminRoutes = require('./routes/admin');
 
 // Validate required environment variables
 if (!process.env.JWT_SECRET || process.env.JWT_SECRET.trim() === '') {
@@ -32,6 +34,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/api/organizations', organizationRoutes);
 app.use('/api/meetings', meetingRoutes);
 app.use('/api/registrants', registrantRoutes);
+app.use('/api/owners', ownerRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
