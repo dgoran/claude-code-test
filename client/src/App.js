@@ -6,6 +6,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Meetings from './pages/Meetings';
 import CreateMeeting from './pages/CreateMeeting';
+import EditMeeting from './pages/EditMeeting';
 import MeetingDetails from './pages/MeetingDetails';
 import Settings from './pages/Settings';
 import LandingPage from './pages/LandingPage';
@@ -24,6 +25,7 @@ function App() {
         <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
         <Route path="/meetings" element={<PrivateRoute><Meetings /></PrivateRoute>} />
         <Route path="/meetings/create" element={<PrivateRoute><CreateMeeting /></PrivateRoute>} />
+        <Route path="/meetings/:id/edit" element={<PrivateRoute><EditMeeting /></PrivateRoute>} />
         <Route path="/meetings/:id" element={<PrivateRoute><MeetingDetails /></PrivateRoute>} />
         <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
 

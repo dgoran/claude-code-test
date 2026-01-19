@@ -31,11 +31,51 @@ const registrantSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  address: {
+    type: String,
+    default: ''
+  },
+  city: {
+    type: String,
+    default: ''
+  },
+  country: {
+    type: String,
+    default: ''
+  },
+  zipCode: {
+    type: String,
+    default: ''
+  },
+  state: {
+    type: String,
+    default: ''
+  },
   company: {
     type: String,
     default: ''
   },
   jobTitle: {
+    type: String,
+    default: ''
+  },
+  industry: {
+    type: String,
+    default: ''
+  },
+  purchasingTimeFrame: {
+    type: String,
+    default: ''
+  },
+  roleInPurchaseProcess: {
+    type: String,
+    default: ''
+  },
+  numberOfEmployees: {
+    type: String,
+    default: ''
+  },
+  comments: {
     type: String,
     default: ''
   },

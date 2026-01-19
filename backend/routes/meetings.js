@@ -17,7 +17,8 @@ router.post('/', authMiddleware, async (req, res) => {
       timezone,
       landingPageTitle,
       landingPageDescription,
-      createInZoom
+      createInZoom,
+      formFields
     } = req.body;
 
     // Validate input
@@ -78,7 +79,8 @@ router.post('/', authMiddleware, async (req, res) => {
       duration: duration || 60,
       timezone: timezone || 'UTC',
       landingPageTitle: landingPageTitle || meetingName,
-      landingPageDescription: landingPageDescription || description || ''
+      landingPageDescription: landingPageDescription || description || '',
+      formFields: formFields || []
     });
 
     await meeting.save();
@@ -157,7 +159,8 @@ router.get('/public/:subdomain/:meetingId', async (req, res) => {
         duration: meeting.duration,
         timezone: meeting.timezone,
         landingPageTitle: meeting.landingPageTitle,
-        landingPageDescription: meeting.landingPageDescription
+        landingPageDescription: meeting.landingPageDescription,
+        formFields: meeting.formFields || []
       },
       organization: {
         organizationName: organization.organizationName,
@@ -190,7 +193,8 @@ router.put('/:id', authMiddleware, async (req, res) => {
       'timezone',
       'landingPageTitle',
       'landingPageDescription',
-      'isActive'
+      'isActive',
+      'formFields'
     ];
 
     allowedUpdates.forEach(field => {
