@@ -1,0 +1,77 @@
+.meeting-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  margin: 30px 0;
+}
+
+.meeting-header h1 {
+  color: #333;
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+
+.meeting-meta {
+  color: #666;
+  font-size: 16px;
+}
+
+.info-row {
+  display: flex;
+  gap: 20px;
+  padding: 15px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-row strong {
+  min-width: 150px;
+  color: #333;
+}
+
+.info-row span,
+.info-row p {
+  color: #666;
+  flex: 1;
+  margin: 0;
+}
+
+.link-container {
+  display: flex;
+  gap: 10px;
+  flex: 1;
+}
+
+.link-container input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.registrants-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.registrants-header h3 {
+  margin: 0;
+  border: none;
+  padding: 0;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 5px;
+}
+
+.btn-sm {
+  padding: 5px 12px;
+  font-size: 13px;
+}
