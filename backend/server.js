@@ -10,6 +10,7 @@ const registrantRoutes = require('./routes/registrants');
 const ownerRoutes = require('./routes/owners');
 const adminRoutes = require('./routes/admin');
 const setupDefaultOwner = require('./utils/setupDefaultOwner');
+const { errorHandler } = require('./middleware/errorHandler');
 
 // Validate required environment variables
 if (!process.env.JWT_SECRET || process.env.JWT_SECRET.trim() === '') {
@@ -43,19 +44,21 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Zoom Registration API is running' });
 });
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error('Error:', err);
-  res.status(500).json({ error: 'Internal server error' });
+// 404 handler for undefined routes
+app.use((req, res, next) => {
+  res.status(404).json({
+    success: false,
+    message: `Route ${req.originalUrl} not found`
+  });
 });
+
+// Centralized error handling middleware
+app.use(errorHandler);
 
 // Connect to MongoDB and start server
 const startServer = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/zoom-registration-app', {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    });
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/zoom-registration-app');
 
     console.log('✓ Connected to MongoDB');
 
