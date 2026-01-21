@@ -9,11 +9,10 @@ const ownerSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    required: [true, 'Email is required'],
+    required: [true, 'Email or username is required'],
     unique: true,
     lowercase: true,
-    trim: true,
-    match: [/^\S+@\S+\.\S+$/, 'Please enter a valid email address']
+    trim: true
   },
   password: {
     type: String,
