@@ -273,8 +273,10 @@ The website owner dashboard provides comprehensive management capabilities for a
 1. **Access with Default Credentials:**
 
    A default owner account is automatically created on first server startup:
-   - **Email:** `admin`
+   - **Username:** `admin`
    - **Password:** `admin`
+
+   **Note:** The Owner Login form accepts both email addresses and usernames. The default account uses "admin" as the username (not an email format).
 
    **⚠️ IMPORTANT:** Change these credentials immediately in production!
 

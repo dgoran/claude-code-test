@@ -1,37 +1,9 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-import { ownerLogin } from '../utils/ownerAuth';
 import './Home.css';
 
 const Home = () => {
-  const [showAdminModal, setShowAdminModal] = useState(false);
-  const [adminCredentials, setAdminCredentials] = useState({ username: '', password: '' });
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
-
-  const handleAdminLogin = async (e) => {
-    e.preventDefault();
-    setError('');
-    setIsLoading(true);
-
-    try {
-      // Use username as email for admin login
-      await ownerLogin(adminCredentials.username, adminCredentials.password);
-      navigate('/owner/dashboard');
-    } catch (err) {
-      setError(err.response?.data?.message || 'Invalid credentials. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleModalClose = () => {
-    setShowAdminModal(false);
-    setAdminCredentials({ username: '', password: '' });
-    setError('');
-  };
 
   return (
     <>
@@ -50,12 +22,6 @@ const Home = () => {
             <Link to="/login">
               <button className="btn btn-secondary btn-large">Sign In</button>
             </Link>
-            <button
-              className="btn btn-admin btn-large"
-              onClick={() => setShowAdminModal(true)}
-            >
-              Admin Login
-            </button>
           </div>
         </div>
 
@@ -129,55 +95,6 @@ const Home = () => {
             </p>
           </div>
         </footer>
-
-        {/* Admin Login Modal */}
-        {showAdminModal && (
-          <div className="modal-overlay" onClick={handleModalClose}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-              <div className="modal-header">
-                <h2>Admin Login</h2>
-                <button className="modal-close" onClick={handleModalClose}>
-                  &times;
-                </button>
-              </div>
-
-              {error && <div className="error-message">{error}</div>}
-
-              <form onSubmit={handleAdminLogin}>
-                <div className="form-group">
-                  <label htmlFor="username">Username</label>
-                  <input
-                    type="text"
-                    id="username"
-                    value={adminCredentials.username}
-                    onChange={(e) => setAdminCredentials({ ...adminCredentials, username: e.target.value })}
-                    required
-                    placeholder="Enter username"
-                    disabled={isLoading}
-                    autoFocus
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="password">Password</label>
-                  <input
-                    type="password"
-                    id="password"
-                    value={adminCredentials.password}
-                    onChange={(e) => setAdminCredentials({ ...adminCredentials, password: e.target.value })}
-                    required
-                    placeholder="Enter password"
-                    disabled={isLoading}
-                  />
-                </div>
-
-                <button type="submit" className="submit-button" disabled={isLoading}>
-                  {isLoading ? 'Logging in...' : 'Login'}
-                </button>
-              </form>
-            </div>
-          </div>
-        )}
       </div>
     </>
   );
