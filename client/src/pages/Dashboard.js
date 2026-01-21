@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import Navbar from '../components/Navbar';
 import { getMeetings, getRegistrants } from '../utils/api';
 import { getOrganization } from '../utils/auth';
 import './Dashboard.css';
@@ -33,12 +32,9 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <>
-        <Navbar />
-        <div className="container">
-          <div className="loading">Loading dashboard...</div>
-        </div>
-      </>
+      <div className="container">
+        <div className="loading">Loading dashboard...</div>
+      </div>
     );
   }
 
@@ -47,15 +43,13 @@ const Dashboard = () => {
   const syncedRegistrants = registrants.filter(r => r.syncedToZoom).length;
 
   return (
-    <>
-      <Navbar />
-      <div className="container">
-        <div className="dashboard-header">
-          <h1>Welcome, {organization?.organizationName}</h1>
-          <Link to="/meetings/create">
-            <button className="btn btn-primary">Create New Meeting</button>
-          </Link>
-        </div>
+    <div className="container">
+      <div className="dashboard-header">
+        <h1>Welcome, {organization?.organizationName}</h1>
+        <Link to="/meetings/create">
+          <button className="btn btn-primary">Create New Meeting</button>
+        </Link>
+      </div>
 
         <div className="stats-grid">
           <div className="stat-card">
@@ -105,14 +99,13 @@ const Dashboard = () => {
           )}
         </div>
 
-        {!organization?.hasZoomCredentials && (
-          <div className="alert alert-info">
-            <strong>Setup Required:</strong> Please add your Zoom API credentials in{' '}
-            <Link to="/settings">Settings</Link> to enable automatic registration syncing.
-          </div>
-        )}
-      </div>
-    </>
+      {!organization?.hasZoomCredentials && (
+        <div className="alert alert-info">
+          <strong>Setup Required:</strong> Please add your Zoom API credentials in{' '}
+          <Link to="/settings">Settings</Link> to enable automatic registration syncing.
+        </div>
+      )}
+    </div>
   );
 };
 
