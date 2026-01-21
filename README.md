@@ -274,7 +274,7 @@ The website owner dashboard provides comprehensive management capabilities for a
 
    A default owner account is automatically created on first server startup:
    - **Username:** `admin`
-   - **Password:** `admin`
+   - **Password:** `admin123`
 
    **Note:** The Owner Login form accepts both email addresses and usernames. The default account uses "admin" as the username (not an email format).
 
@@ -282,7 +282,7 @@ The website owner dashboard provides comprehensive management capabilities for a
 
 2. **Access Owner Dashboard:**
    - Visit `/owner/login` or click "SuperAdmin Portal" in the homepage footer
-   - Login with credentials (default: admin/admin)
+   - Login with credentials (default: admin/admin123)
    - Access the comprehensive admin portal
 
 3. **Create Additional Owner Accounts (Optional):**

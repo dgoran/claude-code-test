@@ -16,7 +16,7 @@ const setupDefaultOwner = async () => {
       const defaultOwner = new Owner({
         name: 'System Administrator',
         email: 'admin',
-        password: 'admin',
+        password: 'admin123',
         role: 'owner',
         isActive: true
       });
@@ -24,8 +24,8 @@ const setupDefaultOwner = async () => {
       await defaultOwner.save();
 
       console.log('✓ Default owner account created successfully');
-      console.log('  Email: admin');
-      console.log('  Password: admin');
+      console.log('  Username: admin');
+      console.log('  Password: admin123');
       console.log('  ⚠️  IMPORTANT: Please change these credentials in production!');
     } else {
       console.log(`✓ Found ${ownerCount} existing owner account(s)`);
