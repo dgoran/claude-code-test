@@ -1,9 +1,19 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import {
+  Box,
+  Container,
+  Card,
+  CardContent,
+  Typography,
+  TextField,
+  Button,
+  Alert,
+  Link,
+} from '@mui/material';
 import Navbar from '../components/Navbar';
 import { loginOrganization } from '../utils/api';
 import { setToken, setOrganization } from '../utils/auth';
-import './Auth.css';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -41,48 +51,78 @@ const Login = () => {
   return (
     <>
       <Navbar />
-      <div className="auth-container">
-        <div className="auth-card">
-          <h2>Sign In to Your Account</h2>
-          <p className="auth-subtitle">Manage your meetings and registrants</p>
+      <Box
+        sx={{
+          minHeight: 'calc(100vh - 64px)',
+          display: 'flex',
+          alignItems: 'center',
+          bgcolor: 'background.default',
+          py: 4,
+        }}
+      >
+        <Container maxWidth="sm">
+          <Card>
+            <CardContent sx={{ p: 4 }}>
+              <Typography variant="h4" component="h2" gutterBottom fontWeight="bold" textAlign="center">
+                Sign In to Your Account
+              </Typography>
+              <Typography variant="body1" color="text.secondary" textAlign="center" sx={{ mb: 3 }}>
+                Manage your meetings and registrants
+              </Typography>
 
-          {error && <div className="alert alert-error">{error}</div>}
+              {error && (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                  {error}
+                </Alert>
+              )}
 
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label>Email</label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="Enter your email"
-                required
-              />
-            </div>
+              <Box component="form" onSubmit={handleSubmit}>
+                <TextField
+                  fullWidth
+                  label="Email"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="Enter your email"
+                  required
+                  margin="normal"
+                />
 
-            <div className="form-group">
-              <label>Password</label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="Enter your password"
-                required
-              />
-            </div>
+                <TextField
+                  fullWidth
+                  label="Password"
+                  name="password"
+                  type="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Enter your password"
+                  required
+                  margin="normal"
+                />
 
-            <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
-              {loading ? 'Signing In...' : 'Sign In'}
-            </button>
-          </form>
+                <Button
+                  type="submit"
+                  fullWidth
+                  variant="contained"
+                  size="large"
+                  disabled={loading}
+                  sx={{ mt: 3, mb: 2 }}
+                >
+                  {loading ? 'Signing In...' : 'Sign In'}
+                </Button>
+              </Box>
 
-          <div className="auth-footer">
-            Don't have an account? <Link to="/register">Create One</Link>
-          </div>
-        </div>
-      </div>
+              <Typography variant="body2" textAlign="center" sx={{ mt: 2 }}>
+                Don't have an account?{' '}
+                <Link component={RouterLink} to="/register" underline="hover">
+                  Create One
+                </Link>
+              </Typography>
+            </CardContent>
+          </Card>
+        </Container>
+      </Box>
     </>
   );
 };

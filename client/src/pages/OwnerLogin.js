@@ -1,7 +1,18 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import {
+  Box,
+  Container,
+  Card,
+  CardContent,
+  Typography,
+  TextField,
+  Button,
+  Alert,
+  Link,
+} from '@mui/material';
+import { AdminPanelSettings as AdminIcon } from '@mui/icons-material';
 import { ownerLogin } from '../utils/ownerAuth';
-import './Login.css';
 
 function OwnerLogin() {
   const [formData, setFormData] = useState({
@@ -36,52 +47,81 @@ function OwnerLogin() {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-box">
-        <h2>Website Owner Login</h2>
-        <p className="login-subtitle">Admin Dashboard Access</p>
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        py: 4,
+      }}
+    >
+      <Container maxWidth="sm">
+        <Card>
+          <CardContent sx={{ p: 4 }}>
+            <Box sx={{ textAlign: 'center', mb: 3 }}>
+              <AdminIcon sx={{ fontSize: 60, color: 'primary.main', mb: 1 }} />
+              <Typography variant="h4" component="h2" gutterBottom fontWeight="bold">
+                Website Owner Login
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                Admin Dashboard Access
+              </Typography>
+            </Box>
 
-        {error && <div className="error-message">{error}</div>}
+            {error && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {error}
+              </Alert>
+            )}
 
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="email">Email or Username</label>
-            <input
-              type="text"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              placeholder="Enter your email or username"
-              disabled={isLoading}
-            />
-          </div>
+            <Box component="form" onSubmit={handleSubmit}>
+              <TextField
+                fullWidth
+                label="Email or Username"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="Enter your email or username"
+                required
+                disabled={isLoading}
+                margin="normal"
+              />
 
-          <div className="form-group">
-            <label htmlFor="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              placeholder="Enter your password"
-              disabled={isLoading}
-            />
-          </div>
+              <TextField
+                fullWidth
+                label="Password"
+                name="password"
+                type="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Enter your password"
+                required
+                disabled={isLoading}
+                margin="normal"
+              />
 
-          <button type="submit" className="submit-button" disabled={isLoading}>
-            {isLoading ? 'Logging in...' : 'Login'}
-          </button>
-        </form>
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                size="large"
+                disabled={isLoading}
+                sx={{ mt: 3, mb: 2 }}
+              >
+                {isLoading ? 'Logging in...' : 'Login'}
+              </Button>
+            </Box>
 
-        <div className="login-footer">
-          <a href="/login">Login as Organization</a>
-        </div>
-      </div>
-    </div>
+            <Typography variant="body2" textAlign="center" sx={{ mt: 2 }}>
+              <Link component={RouterLink} to="/login" underline="hover">
+                Login as Organization
+              </Link>
+            </Typography>
+          </CardContent>
+        </Card>
+      </Container>
+    </Box>
   );
 }
 
