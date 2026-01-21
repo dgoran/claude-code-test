@@ -1,0 +1,11 @@
+node_modules/
+dist/
+build/
+coverage/
+*.config.js
+client/build/
+backend/node_modules/
+client/node_modules/
+.env
+.env.local
+.env.*.local

@@ -110,134 +110,100 @@ class ZoomService {
     }
   }
 
-  // Add registrant to meeting
+  // Build registrant payload from data (extracted to avoid duplication)
+  buildRegistrantPayload(registrantData) {
+    const payload = {
+      email: registrantData.email,
+      first_name: registrantData.first_name,
+      last_name: registrantData.last_name
+    };
+
+    // Add optional fields if they exist
+    const optionalFields = [
+      'phone', 'address', 'city', 'country', 'zip', 'state',
+      'job_title', 'industry', 'purchasing_time_frame',
+      'role_in_purchase_process', 'no_of_employees', 'comments'
+    ];
+
+    optionalFields.forEach(field => {
+      if (registrantData[field]) {
+        payload[field] = registrantData[field];
+      }
+    });
+
+    // Map company to org (Zoom API uses 'org' instead of 'company')
+    if (registrantData.company) {
+      payload.org = registrantData.company;
+    }
+
+    return payload;
+  }
+
+  // Generic method to add registrant to meeting or webinar
+  async addRegistrant(type, id, registrantData) {
+    try {
+      const token = await this.getAccessToken();
+      const payload = this.buildRegistrantPayload(registrantData);
+      const endpoint = type === 'meeting' ? 'meetings' : 'webinars';
+
+      const response = await axios.post(
+        `https://api.zoom.us/v2/${endpoint}/${id}/registrants`,
+        payload,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error(`Error adding ${type} registrant:`, error.response?.data || error.message);
+      throw new Error(`Failed to add registrant to Zoom ${type}`);
+    }
+  }
+
+  // Add registrant to meeting (wrapper for backward compatibility)
   async addMeetingRegistrant(meetingId, registrantData) {
-    try {
-      const token = await this.getAccessToken();
-
-      const payload = {
-        email: registrantData.email,
-        first_name: registrantData.first_name,
-        last_name: registrantData.last_name
-      };
-
-      // Add optional fields if they exist
-      if (registrantData.phone) payload.phone = registrantData.phone;
-      if (registrantData.address) payload.address = registrantData.address;
-      if (registrantData.city) payload.city = registrantData.city;
-      if (registrantData.country) payload.country = registrantData.country;
-      if (registrantData.zip) payload.zip = registrantData.zip;
-      if (registrantData.state) payload.state = registrantData.state;
-      if (registrantData.company) payload.org = registrantData.company;
-      if (registrantData.job_title) payload.job_title = registrantData.job_title;
-      if (registrantData.industry) payload.industry = registrantData.industry;
-      if (registrantData.purchasing_time_frame) payload.purchasing_time_frame = registrantData.purchasing_time_frame;
-      if (registrantData.role_in_purchase_process) payload.role_in_purchase_process = registrantData.role_in_purchase_process;
-      if (registrantData.no_of_employees) payload.no_of_employees = registrantData.no_of_employees;
-      if (registrantData.comments) payload.comments = registrantData.comments;
-
-      const response = await axios.post(
-        `https://api.zoom.us/v2/meetings/${meetingId}/registrants`,
-        payload,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-
-      return response.data;
-    } catch (error) {
-      console.error('Error adding meeting registrant:', error.response?.data || error.message);
-      throw new Error('Failed to add registrant to Zoom meeting');
-    }
+    return this.addRegistrant('meeting', meetingId, registrantData);
   }
 
-  // Add registrant to webinar
+  // Add registrant to webinar (wrapper for backward compatibility)
   async addWebinarRegistrant(webinarId, registrantData) {
+    return this.addRegistrant('webinar', webinarId, registrantData);
+  }
+
+  // Generic method to get meeting or webinar details
+  async getDetails(type, id) {
     try {
       const token = await this.getAccessToken();
+      const endpoint = type === 'meeting' ? 'meetings' : 'webinars';
 
-      const payload = {
-        email: registrantData.email,
-        first_name: registrantData.first_name,
-        last_name: registrantData.last_name
-      };
-
-      // Add optional fields if they exist
-      if (registrantData.phone) payload.phone = registrantData.phone;
-      if (registrantData.address) payload.address = registrantData.address;
-      if (registrantData.city) payload.city = registrantData.city;
-      if (registrantData.country) payload.country = registrantData.country;
-      if (registrantData.zip) payload.zip = registrantData.zip;
-      if (registrantData.state) payload.state = registrantData.state;
-      if (registrantData.company) payload.org = registrantData.company;
-      if (registrantData.job_title) payload.job_title = registrantData.job_title;
-      if (registrantData.industry) payload.industry = registrantData.industry;
-      if (registrantData.purchasing_time_frame) payload.purchasing_time_frame = registrantData.purchasing_time_frame;
-      if (registrantData.role_in_purchase_process) payload.role_in_purchase_process = registrantData.role_in_purchase_process;
-      if (registrantData.no_of_employees) payload.no_of_employees = registrantData.no_of_employees;
-      if (registrantData.comments) payload.comments = registrantData.comments;
-
-      const response = await axios.post(
-        `https://api.zoom.us/v2/webinars/${webinarId}/registrants`,
-        payload,
+      const response = await axios.get(
+        `https://api.zoom.us/v2/${endpoint}/${id}`,
         {
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
+            'Authorization': `Bearer ${token}`
           }
         }
       );
 
       return response.data;
     } catch (error) {
-      console.error('Error adding webinar registrant:', error.response?.data || error.message);
-      throw new Error('Failed to add registrant to Zoom webinar');
+      console.error(`Error getting ${type} details:`, error.response?.data || error.message);
+      throw new Error(`Failed to get Zoom ${type} details`);
     }
   }
 
-  // Get meeting details
+  // Get meeting details (wrapper for backward compatibility)
   async getMeeting(meetingId) {
-    try {
-      const token = await this.getAccessToken();
-
-      const response = await axios.get(
-        `https://api.zoom.us/v2/meetings/${meetingId}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        }
-      );
-
-      return response.data;
-    } catch (error) {
-      console.error('Error getting meeting details:', error.response?.data || error.message);
-      throw new Error('Failed to get Zoom meeting details');
-    }
+    return this.getDetails('meeting', meetingId);
   }
 
-  // Get webinar details
+  // Get webinar details (wrapper for backward compatibility)
   async getWebinar(webinarId) {
-    try {
-      const token = await this.getAccessToken();
-
-      const response = await axios.get(
-        `https://api.zoom.us/v2/webinars/${webinarId}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        }
-      );
-
-      return response.data;
-    } catch (error) {
-      console.error('Error getting webinar details:', error.response?.data || error.message);
-      throw new Error('Failed to get Zoom webinar details');
-    }
+    return this.getDetails('webinar', webinarId);
   }
 }
 

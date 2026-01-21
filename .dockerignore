@@ -1,0 +1,65 @@
+# Dependencies
+node_modules/
+backend/node_modules/
+client/node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# Build outputs
+dist/
+build/
+client/build/
+*.log
+
+# Testing
+coverage/
+.nyc_output/
+*.test.js
+*.spec.js
+
+# Environment files
+.env
+.env.local
+.env.*.local
+.env.development
+.env.test
+.env.production
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+.DS_Store
+*.sublime-*
+
+# Documentation
+README.md
+CONTRIBUTING.md
+LICENSE
+*.md
+docs/
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+.circleci/
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Misc
+tmp/
+temp/
+*.tmp

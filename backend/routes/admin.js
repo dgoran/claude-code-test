@@ -25,34 +25,60 @@ router.get('/organizations', ownerAuth, async (req, res) => {
       filter.isActive = status === 'active';
     }
 
-    // Get organizations
-    const organizations = await Organization.find(filter)
-      .select('-password')
-      .sort({ [sortBy]: sortOrder === 'asc' ? 1 : -1 })
-      .limit(parseInt(limit))
-      .skip((parseInt(page) - 1) * parseInt(limit))
-      .lean();
-
-    // Get statistics for each organization
-    const orgsWithStats = await Promise.all(
-      organizations.map(async (org) => {
-        const [meetingsCount, registrantsCount, syncedCount] = await Promise.all([
-          Meeting.countDocuments({ organizationId: org._id }),
-          Registrant.countDocuments({ organizationId: org._id }),
-          Registrant.countDocuments({ organizationId: org._id, syncedToZoom: true })
-        ]);
-
-        return {
-          ...org,
-          stats: {
-            meetings: meetingsCount,
-            registrants: registrantsCount,
-            syncedToZoom: syncedCount,
-            hasZoomCredentials: !!(org.zoomClientId && org.zoomClientSecret && org.zoomAccountId)
+    // Build aggregation pipeline to get organizations with stats in a single query
+    const aggregationPipeline = [
+      { $match: filter },
+      {
+        $lookup: {
+          from: 'meetings',
+          localField: '_id',
+          foreignField: 'organizationId',
+          as: 'meetings'
+        }
+      },
+      {
+        $lookup: {
+          from: 'registrants',
+          localField: '_id',
+          foreignField: 'organizationId',
+          as: 'registrants'
+        }
+      },
+      {
+        $addFields: {
+          'stats.meetings': { $size: '$meetings' },
+          'stats.registrants': { $size: '$registrants' },
+          'stats.syncedToZoom': {
+            $size: {
+              $filter: {
+                input: '$registrants',
+                as: 'reg',
+                cond: { $eq: ['$$reg.syncedToZoom', true] }
+              }
+            }
+          },
+          'stats.hasZoomCredentials': {
+            $and: [
+              { $ne: ['$zoomClientId', null] },
+              { $ne: ['$zoomClientSecret', null] },
+              { $ne: ['$zoomAccountId', null] }
+            ]
           }
-        };
-      })
-    );
+        }
+      },
+      {
+        $project: {
+          password: 0,
+          meetings: 0,
+          registrants: 0
+        }
+      },
+      { $sort: { [sortBy]: sortOrder === 'asc' ? 1 : -1 } },
+      { $skip: (parseInt(page) - 1) * parseInt(limit) },
+      { $limit: parseInt(limit) }
+    ];
+
+    const orgsWithStats = await Organization.aggregate(aggregationPipeline);
 
     // Get total count
     const total = await Organization.countDocuments(filter);
@@ -396,24 +422,46 @@ router.get('/meetings', ownerAuth, async (req, res) => {
       filter.organizationId = organizationId;
     }
 
-    // Get meetings
-    const meetings = await Meeting.find(filter)
-      .populate('organizationId', 'organizationName subdomain')
-      .sort({ createdAt: -1 })
-      .limit(parseInt(limit))
-      .skip((parseInt(page) - 1) * parseInt(limit))
-      .lean();
-
-    // Get registrant counts for each meeting
-    const meetingsWithCounts = await Promise.all(
-      meetings.map(async (meeting) => {
-        const registrantCount = await Registrant.countDocuments({ meetingId: meeting._id });
-        return {
-          ...meeting,
-          registrantCount
-        };
-      })
-    );
+    // Use aggregation to get meetings with registrant counts in a single query
+    const meetingsWithCounts = await Meeting.aggregate([
+      { $match: filter },
+      {
+        $lookup: {
+          from: 'registrants',
+          localField: '_id',
+          foreignField: 'meetingId',
+          as: 'registrants'
+        }
+      },
+      {
+        $lookup: {
+          from: 'organizations',
+          localField: 'organizationId',
+          foreignField: '_id',
+          as: 'organization'
+        }
+      },
+      { $unwind: { path: '$organization', preserveNullAndEmptyArrays: true } },
+      {
+        $addFields: {
+          registrantCount: { $size: '$registrants' },
+          organizationId: {
+            _id: '$organization._id',
+            organizationName: '$organization.organizationName',
+            subdomain: '$organization.subdomain'
+          }
+        }
+      },
+      {
+        $project: {
+          registrants: 0,
+          organization: 0
+        }
+      },
+      { $sort: { createdAt: -1 } },
+      { $skip: (parseInt(page) - 1) * parseInt(limit) },
+      { $limit: parseInt(limit) }
+    ]);
 
     // Get total count
     const total = await Meeting.countDocuments(filter);
