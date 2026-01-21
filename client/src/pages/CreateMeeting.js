@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Navbar from '../components/Navbar';
 import FormBuilder from '../components/FormBuilder';
 import { createMeeting } from '../utils/api';
 import { getOrganization } from '../utils/auth';
@@ -69,10 +68,8 @@ const CreateMeeting = () => {
   };
 
   return (
-    <>
-      <Navbar />
-      <div className="container">
-        <h1>Create New Meeting/Webinar</h1>
+    <div className="container">
+      <h1>Create New Meeting/Webinar</h1>
 
         {error && <div className="alert alert-error">{error}</div>}
 
@@ -219,8 +216,7 @@ const CreateMeeting = () => {
             </div>
           </form>
         </div>
-      </div>
-    </>
+    </div>
   );
 };
 

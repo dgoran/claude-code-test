@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import Navbar from '../components/Navbar';
 import { getMeetings, deleteMeeting } from '../utils/api';
 import { getOrganization } from '../utils/auth';
 import './Meetings.css';
@@ -66,25 +65,20 @@ const Meetings = () => {
 
   if (loading) {
     return (
-      <>
-        <Navbar />
-        <div className="container">
-          <div className="loading">Loading meetings...</div>
-        </div>
-      </>
+      <div className="container">
+        <div className="loading">Loading meetings...</div>
+      </div>
     );
   }
 
   return (
-    <>
-      <Navbar />
-      <div className="container">
-        <div className="page-header">
-          <h1>My Meetings & Webinars</h1>
-          <Link to="/meetings/create">
-            <button className="btn btn-primary">Create New Meeting</button>
-          </Link>
-        </div>
+    <div className="container">
+      <div className="page-header">
+        <h1>My Meetings & Webinars</h1>
+        <Link to="/meetings/create">
+          <button className="btn btn-primary">Create New Meeting</button>
+        </Link>
+      </div>
 
         {meetings.length > 0 ? (
           <div className="meetings-grid">
@@ -128,8 +122,7 @@ const Meetings = () => {
             </Link>
           </div>
         )}
-      </div>
-    </>
+    </div>
   );
 };
 
