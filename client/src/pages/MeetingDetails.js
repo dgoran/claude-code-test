@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import Navbar from '../components/Navbar';
 import { getMeeting, getMeetingRegistrants, syncRegistrant, deleteRegistrant } from '../utils/api';
 import { getOrganization } from '../utils/auth';
 import './MeetingDetails.css';
@@ -107,33 +106,25 @@ const MeetingDetails = () => {
 
   if (loading) {
     return (
-      <>
-        <Navbar />
-        <div className="container">
-          <div className="loading">Loading meeting details...</div>
-        </div>
-      </>
+      <div className="container">
+        <div className="loading">Loading meeting details...</div>
+      </div>
     );
   }
 
   if (!meeting) {
     return (
-      <>
-        <Navbar />
-        <div className="container">
-          <div className="alert alert-error">Meeting not found</div>
-        </div>
-      </>
+      <div className="container">
+        <div className="alert alert-error">Meeting not found</div>
+      </div>
     );
   }
 
   return (
-    <>
-      <Navbar />
-      <div className="container">
-        <button onClick={() => navigate('/meetings')} className="btn btn-secondary">
-          ← Back to Meetings
-        </button>
+    <div className="container">
+      <button onClick={() => navigate('/meetings')} className="btn btn-secondary">
+        ← Back to Meetings
+      </button>
 
         <div className="meeting-header">
           <div>
@@ -246,8 +237,7 @@ const MeetingDetails = () => {
             </div>
           )}
         </div>
-      </div>
-    </>
+    </div>
   );
 };
 

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Navbar from '../components/Navbar';
 import { getProfile, updateZoomCredentials } from '../utils/api';
 import { setOrganization } from '../utils/auth';
 import './Settings.css';
@@ -74,20 +73,15 @@ const Settings = () => {
 
   if (loading) {
     return (
-      <>
-        <Navbar />
-        <div className="container">
-          <div className="loading">Loading settings...</div>
-        </div>
-      </>
+      <div className="container">
+        <div className="loading">Loading settings...</div>
+      </div>
     );
   }
 
   return (
-    <>
-      <Navbar />
-      <div className="container">
-        <h1>Settings</h1>
+    <div className="container">
+      <h1>Settings</h1>
 
         <div className="card">
           <h3>Organization Information</h3>
@@ -180,8 +174,7 @@ const Settings = () => {
             </button>
           </form>
         </div>
-      </div>
-    </>
+    </div>
   );
 };
 

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import Navbar from '../components/Navbar';
 import FormBuilder from '../components/FormBuilder';
 import { getMeeting, updateMeeting } from '../utils/api';
 import { getOrganization } from '../utils/auth';
@@ -103,22 +102,17 @@ const EditMeeting = () => {
 
   if (fetchingMeeting) {
     return (
-      <>
-        <Navbar />
-        <div className="container">
-          <div className="card">
-            <p>Loading meeting details...</p>
-          </div>
+      <div className="container">
+        <div className="card">
+          <p>Loading meeting details...</p>
         </div>
-      </>
+      </div>
     );
   }
 
   return (
-    <>
-      <Navbar />
-      <div className="container">
-        <h1>Edit Meeting/Webinar</h1>
+    <div className="container">
+      <h1>Edit Meeting/Webinar</h1>
 
         {error && <div className="alert alert-error">{error}</div>}
 
@@ -260,8 +254,7 @@ const EditMeeting = () => {
             </div>
           </form>
         </div>
-      </div>
-    </>
+    </div>
   );
 };
 
