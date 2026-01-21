@@ -1,101 +1,235 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
+import {
+  Box,
+  Container,
+  Typography,
+  Button,
+  Grid,
+  Card,
+  CardContent,
+  Avatar,
+  Link,
+} from '@mui/material';
+import {
+  CheckCircleOutline as CheckIcon,
+  IntegrationInstructions as IntegrationIcon,
+  Web as WebIcon,
+  Business as BusinessIcon,
+  People as PeopleIcon,
+  VpnKey as VpnKeyIcon,
+} from '@mui/icons-material';
 import Navbar from '../components/Navbar';
-import './Home.css';
 
 const Home = () => {
+  const features = [
+    {
+      icon: <CheckIcon sx={{ fontSize: 40 }} />,
+      title: 'Easy Setup',
+      description: 'Create your organization account in minutes and start building registration pages immediately.',
+    },
+    {
+      icon: <IntegrationIcon sx={{ fontSize: 40 }} />,
+      title: 'Zoom Integration',
+      description: 'Automatically sync all registrants to your Zoom meetings and webinars via API.',
+    },
+    {
+      icon: <WebIcon sx={{ fontSize: 40 }} />,
+      title: 'Custom Landing Pages',
+      description: 'Each meeting gets a beautiful, customizable landing page with registration form.',
+    },
+    {
+      icon: <BusinessIcon sx={{ fontSize: 40 }} />,
+      title: 'Multi-Tenant',
+      description: 'Each organization gets their own subdomain and isolated data management.',
+    },
+    {
+      icon: <PeopleIcon sx={{ fontSize: 40 }} />,
+      title: 'Registrant Management',
+      description: 'View, manage, and export all your registrants from a central dashboard.',
+    },
+    {
+      icon: <VpnKeyIcon sx={{ fontSize: 40 }} />,
+      title: 'API Keys Management',
+      description: 'Securely store and manage your Zoom API credentials for seamless integration.',
+    },
+  ];
+
+  const steps = [
+    {
+      number: 1,
+      title: 'Create Your Account',
+      description: 'Sign up with your organization name and email',
+    },
+    {
+      number: 2,
+      title: 'Configure Zoom API',
+      description: 'Add your Zoom API credentials in settings',
+    },
+    {
+      number: 3,
+      title: 'Create Meetings',
+      description: 'Set up your webinars and meetings',
+    },
+    {
+      number: 4,
+      title: 'Share & Register',
+      description: 'Share your registration page and collect attendees',
+    },
+  ];
 
   return (
     <>
       <Navbar />
-      <div className="home-container">
-        <div className="hero-section">
-          <h1>Zoom Webinar & Meeting Registration Platform</h1>
-          <p className="hero-subtitle">
-            Create beautiful registration pages for your Zoom meetings and webinars.
-            Automatically sync registrants to your Zoom account.
-          </p>
-          <div className="hero-buttons">
-            <Link to="/register">
-              <button className="btn btn-primary btn-large">Get Started Free</button>
+      <Box>
+        {/* Hero Section */}
+        <Box
+          sx={{
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: 'white',
+            py: 10,
+            textAlign: 'center',
+          }}
+        >
+          <Container maxWidth="md">
+            <Typography variant="h2" component="h1" gutterBottom fontWeight="bold">
+              Zoom Webinar & Meeting Registration Platform
+            </Typography>
+            <Typography variant="h6" sx={{ mb: 4, opacity: 0.95 }}>
+              Create beautiful registration pages for your Zoom meetings and webinars.
+              Automatically sync registrants to your Zoom account.
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
+              <Button
+                component={RouterLink}
+                to="/register"
+                variant="contained"
+                size="large"
+                sx={{
+                  bgcolor: 'white',
+                  color: 'primary.main',
+                  '&:hover': { bgcolor: 'grey.100' },
+                  px: 4,
+                  py: 1.5,
+                  fontSize: '1.1rem',
+                }}
+              >
+                Get Started Free
+              </Button>
+              <Button
+                component={RouterLink}
+                to="/login"
+                variant="outlined"
+                size="large"
+                sx={{
+                  borderColor: 'white',
+                  color: 'white',
+                  '&:hover': { borderColor: 'white', bgcolor: 'rgba(255,255,255,0.1)' },
+                  px: 4,
+                  py: 1.5,
+                  fontSize: '1.1rem',
+                }}
+              >
+                Sign In
+              </Button>
+            </Box>
+          </Container>
+        </Box>
+
+        {/* Features Section */}
+        <Container maxWidth="lg" sx={{ py: 8 }}>
+          <Typography variant="h3" component="h2" textAlign="center" gutterBottom fontWeight="bold">
+            Features
+          </Typography>
+          <Grid container spacing={4} sx={{ mt: 2 }}>
+            {features.map((feature, index) => (
+              <Grid item xs={12} sm={6} md={4} key={index}>
+                <Card sx={{ height: '100%', textAlign: 'center', p: 2 }}>
+                  <CardContent>
+                    <Box sx={{ color: 'primary.main', mb: 2 }}>{feature.icon}</Box>
+                    <Typography variant="h5" component="h3" gutterBottom fontWeight={600}>
+                      {feature.title}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {feature.description}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        </Container>
+
+        {/* How It Works Section */}
+        <Box sx={{ bgcolor: 'background.default', py: 8 }}>
+          <Container maxWidth="lg">
+            <Typography variant="h3" component="h2" textAlign="center" gutterBottom fontWeight="bold">
+              How It Works
+            </Typography>
+            <Grid container spacing={4} sx={{ mt: 2 }}>
+              {steps.map((step) => (
+                <Grid item xs={12} sm={6} md={3} key={step.number}>
+                  <Box sx={{ textAlign: 'center' }}>
+                    <Avatar
+                      sx={{
+                        bgcolor: 'primary.main',
+                        width: 60,
+                        height: 60,
+                        mx: 'auto',
+                        mb: 2,
+                        fontSize: '1.5rem',
+                        fontWeight: 'bold',
+                      }}
+                    >
+                      {step.number}
+                    </Avatar>
+                    <Typography variant="h6" component="h3" gutterBottom fontWeight={600}>
+                      {step.title}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {step.description}
+                    </Typography>
+                  </Box>
+                </Grid>
+              ))}
+            </Grid>
+          </Container>
+        </Box>
+
+        {/* Footer */}
+        <Box
+          component="footer"
+          sx={{
+            bgcolor: 'background.paper',
+            py: 4,
+            borderTop: 1,
+            borderColor: 'divider',
+            textAlign: 'center',
+          }}
+        >
+          <Container>
+            <Link
+              component={RouterLink}
+              to="/owner/login"
+              sx={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 1,
+                mb: 2,
+                textDecoration: 'none',
+                color: 'primary.main',
+                fontWeight: 500,
+              }}
+            >
+              <span>🔐</span>
+              <span>SuperAdmin Portal</span>
             </Link>
-            <Link to="/login">
-              <button className="btn btn-secondary btn-large">Sign In</button>
-            </Link>
-          </div>
-        </div>
-
-        <div className="features-section">
-          <h2>Features</h2>
-          <div className="features-grid">
-            <div className="feature-card">
-              <h3>Easy Setup</h3>
-              <p>Create your organization account in minutes and start building registration pages immediately.</p>
-            </div>
-            <div className="feature-card">
-              <h3>Zoom Integration</h3>
-              <p>Automatically sync all registrants to your Zoom meetings and webinars via API.</p>
-            </div>
-            <div className="feature-card">
-              <h3>Custom Landing Pages</h3>
-              <p>Each meeting gets a beautiful, customizable landing page with registration form.</p>
-            </div>
-            <div className="feature-card">
-              <h3>Multi-Tenant</h3>
-              <p>Each organization gets their own subdomain and isolated data management.</p>
-            </div>
-            <div className="feature-card">
-              <h3>Registrant Management</h3>
-              <p>View, manage, and export all your registrants from a central dashboard.</p>
-            </div>
-            <div className="feature-card">
-              <h3>API Keys Management</h3>
-              <p>Securely store and manage your Zoom API credentials for seamless integration.</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="how-it-works">
-          <h2>How It Works</h2>
-          <div className="steps">
-            <div className="step">
-              <div className="step-number">1</div>
-              <h3>Create Your Account</h3>
-              <p>Sign up with your organization name and email</p>
-            </div>
-            <div className="step">
-              <div className="step-number">2</div>
-              <h3>Configure Zoom API</h3>
-              <p>Add your Zoom API credentials in settings</p>
-            </div>
-            <div className="step">
-              <div className="step-number">3</div>
-              <h3>Create Meetings</h3>
-              <p>Set up your webinars and meetings</p>
-            </div>
-            <div className="step">
-              <div className="step-number">4</div>
-              <h3>Share & Register</h3>
-              <p>Share your registration page and collect attendees</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Footer with SuperAdmin Link */}
-        <footer className="home-footer">
-          <div className="footer-content">
-            <div className="footer-links">
-              <Link to="/owner/login" className="superadmin-link">
-                <span className="superadmin-icon">🔐</span>
-                <span>SuperAdmin Portal</span>
-              </Link>
-            </div>
-            <p className="footer-copyright">
+            <Typography variant="body2" color="text.secondary">
               © 2024 Zoom Registration Platform. All rights reserved.
-            </p>
-          </div>
-        </footer>
-      </div>
+            </Typography>
+          </Container>
+        </Box>
+      </Box>
     </>
   );
 };

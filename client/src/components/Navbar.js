@@ -1,5 +1,6 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
 import { isAuthenticated, logout, getOrganization } from '../utils/auth';
 
 const Navbar = () => {
@@ -12,33 +13,78 @@ const Navbar = () => {
   };
 
   return (
-    <div className="header">
-      <div className="nav">
-        <Link to={isAuthenticated() ? '/dashboard' : '/'} className="nav-brand">
+    <AppBar position="static" color="inherit" elevation={1}>
+      <Toolbar sx={{ maxWidth: 1200, width: '100%', mx: 'auto', px: 2 }}>
+        <Typography
+          variant="h6"
+          component={RouterLink}
+          to={isAuthenticated() ? '/dashboard' : '/'}
+          sx={{
+            flexGrow: 1,
+            color: 'primary.main',
+            textDecoration: 'none',
+            fontWeight: 'bold',
+          }}
+        >
           Zoom Registration
-        </Link>
-        <div className="nav-links">
+        </Typography>
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
           {isAuthenticated() ? (
             <>
-              <span>Welcome, {organization?.organizationName || 'User'}</span>
-              <Link to="/dashboard">Dashboard</Link>
-              <Link to="/meetings">Meetings</Link>
-              <Link to="/settings">Settings</Link>
-              <button onClick={handleLogout} className="btn btn-secondary">
+              <Typography variant="body1" sx={{ color: 'text.primary' }}>
+                Welcome, {organization?.organizationName || 'User'}
+              </Typography>
+              <Button
+                component={RouterLink}
+                to="/dashboard"
+                color="inherit"
+              >
+                Dashboard
+              </Button>
+              <Button
+                component={RouterLink}
+                to="/meetings"
+                color="inherit"
+              >
+                Meetings
+              </Button>
+              <Button
+                component={RouterLink}
+                to="/settings"
+                color="inherit"
+              >
+                Settings
+              </Button>
+              <Button
+                onClick={handleLogout}
+                variant="contained"
+                color="secondary"
+              >
                 Logout
-              </button>
+              </Button>
             </>
           ) : (
             <>
-              <Link to="/login">Login</Link>
-              <Link to="/register">
-                <button className="btn btn-primary">Get Started</button>
-              </Link>
+              <Button
+                component={RouterLink}
+                to="/login"
+                color="inherit"
+              >
+                Login
+              </Button>
+              <Button
+                component={RouterLink}
+                to="/register"
+                variant="contained"
+                color="primary"
+              >
+                Get Started
+              </Button>
             </>
           )}
-        </div>
-      </div>
-    </div>
+        </Box>
+      </Toolbar>
+    </AppBar>
   );
 };
 
