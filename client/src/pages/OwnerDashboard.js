@@ -1,8 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  Container,
+  Box,
+  Typography,
+  Button,
+  Paper,
+  Grid,
+  Card,
+  CardContent,
+  CircularProgress,
+  Alert,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Chip,
+} from '@mui/material';
+import {
+  Business as BusinessIcon,
+  Event as EventIcon,
+  People as PeopleIcon,
+  CheckCircle as CheckCircleIcon,
+  Settings as SettingsIcon,
+  VideoCall as VideoCallIcon,
+  PersonAdd as PersonAddIcon,
+} from '@mui/icons-material';
 import axios from 'axios';
 import { getOwnerToken, getOwnerData } from '../utils/ownerAuth';
-import './Dashboard.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
@@ -33,181 +60,227 @@ function OwnerDashboard() {
   };
 
   if (loading) {
-    return <div className="dashboard-container"><p>Loading dashboard...</p></div>;
+    return (
+      <Container maxWidth="lg" sx={{ py: 4, textAlign: 'center' }}>
+        <CircularProgress />
+        <Typography sx={{ mt: 2 }}>Loading dashboard...</Typography>
+      </Container>
+    );
   }
 
   if (error) {
-    return <div className="dashboard-container"><p className="error">{error}</p></div>;
+    return (
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Alert severity="error">{error}</Alert>
+      </Container>
+    );
   }
 
+  const statCards = [
+    {
+      title: 'Total Organizations',
+      value: stats?.summary?.organizations?.total || 0,
+      detail: `${stats?.summary?.organizations?.active || 0} active, ${stats?.summary?.organizations?.inactive || 0} inactive`,
+      icon: <BusinessIcon sx={{ fontSize: 40 }} />,
+      color: 'primary.main',
+    },
+    {
+      title: 'Total Meetings',
+      value: stats?.summary?.meetings?.total || 0,
+      detail: `${stats?.summary?.meetings?.active || 0} active meetings`,
+      icon: <EventIcon sx={{ fontSize: 40 }} />,
+      color: 'info.main',
+    },
+    {
+      title: 'Total Registrants',
+      value: stats?.summary?.registrants?.total || 0,
+      detail: `${stats?.summary?.registrants?.syncRate}% synced to Zoom`,
+      icon: <PeopleIcon sx={{ fontSize: 40 }} />,
+      color: 'success.main',
+    },
+    {
+      title: 'Zoom Synced',
+      value: stats?.summary?.registrants?.syncedToZoom || 0,
+      detail: 'Successfully synced registrations',
+      icon: <CheckCircleIcon sx={{ fontSize: 40 }} />,
+      color: 'secondary.main',
+    },
+  ];
+
+  const quickActions = [
+    {
+      label: 'Manage Organizations',
+      icon: <BusinessIcon />,
+      onClick: () => navigate('/owner/organizations'),
+    },
+    {
+      label: 'View All Meetings',
+      icon: <EventIcon />,
+      onClick: () => navigate('/owner/meetings'),
+    },
+    {
+      label: 'View All Registrants',
+      icon: <PeopleIcon />,
+      onClick: () => navigate('/owner/registrants'),
+    },
+    {
+      label: 'Zoom API Settings',
+      icon: <VideoCallIcon />,
+      onClick: () => navigate('/owner/zoom-settings'),
+    },
+  ];
+
   return (
-    <div className="dashboard-container">
-      <div className="dashboard-header">
-        <h1>Website Owner Dashboard</h1>
-        <p className="welcome-text">Welcome back, {ownerData?.name}!</p>
-      </div>
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h4" component="h1" fontWeight="bold">
+          Website Owner Dashboard
+        </Typography>
+        <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
+          Welcome back, {ownerData?.name}!
+        </Typography>
+      </Box>
 
-      {/* Summary Statistics */}
-      <div className="stats-grid">
-        <div className="stat-card">
-          <div className="stat-icon">🏢</div>
-          <div className="stat-content">
-            <h3>Total Organizations</h3>
-            <p className="stat-number">{stats?.summary?.organizations?.total || 0}</p>
-            <p className="stat-detail">
-              {stats?.summary?.organizations?.active || 0} active, {stats?.summary?.organizations?.inactive || 0} inactive
-            </p>
-          </div>
-        </div>
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        {statCards.map((stat, index) => (
+          <Grid item xs={12} sm={6} md={3} key={index}>
+            <Card>
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <Box sx={{ color: stat.color }}>{stat.icon}</Box>
+                </Box>
+                <Typography variant="h4" component="div" fontWeight="bold">
+                  {stat.value}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                  {stat.title}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {stat.detail}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
 
-        <div className="stat-card">
-          <div className="stat-icon">📅</div>
-          <div className="stat-content">
-            <h3>Total Meetings</h3>
-            <p className="stat-number">{stats?.summary?.meetings?.total || 0}</p>
-            <p className="stat-detail">
-              {stats?.summary?.meetings?.active || 0} active meetings
-            </p>
-          </div>
-        </div>
-
-        <div className="stat-card">
-          <div className="stat-icon">👥</div>
-          <div className="stat-content">
-            <h3>Total Registrants</h3>
-            <p className="stat-number">{stats?.summary?.registrants?.total || 0}</p>
-            <p className="stat-detail">
-              {stats?.summary?.registrants?.syncRate}% synced to Zoom
-            </p>
-          </div>
-        </div>
-
-        <div className="stat-card">
-          <div className="stat-icon">✅</div>
-          <div className="stat-content">
-            <h3>Zoom Synced</h3>
-            <p className="stat-number">{stats?.summary?.registrants?.syncedToZoom || 0}</p>
-            <p className="stat-detail">
-              Successfully synced registrations
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Top Organizations */}
-      <div className="dashboard-section">
-        <h2>Top Organizations by Registrants</h2>
-        <div className="table-container">
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Organization Name</th>
-                <th>Subdomain</th>
-                <th>Registrants</th>
-              </tr>
-            </thead>
-            <tbody>
+      <Paper sx={{ p: 3, mb: 3 }}>
+        <Typography variant="h6" component="h2" fontWeight="bold" gutterBottom>
+          Top Organizations by Registrants
+        </Typography>
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Organization Name</TableCell>
+                <TableCell>Subdomain</TableCell>
+                <TableCell align="right">Registrants</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
               {stats?.topOrganizations?.length > 0 ? (
                 stats.topOrganizations.map((org) => (
-                  <tr key={org._id}>
-                    <td>{org.organizationName}</td>
-                    <td>{org.subdomain}</td>
-                    <td>{org.registrants}</td>
-                  </tr>
+                  <TableRow key={org._id}>
+                    <TableCell>{org.organizationName}</TableCell>
+                    <TableCell>
+                      <Chip label={org.subdomain} size="small" variant="outlined" />
+                    </TableCell>
+                    <TableCell align="right">{org.registrants}</TableCell>
+                  </TableRow>
                 ))
               ) : (
-                <tr>
-                  <td colSpan="3" style={{ textAlign: 'center' }}>No data available</td>
-                </tr>
+                <TableRow>
+                  <TableCell colSpan={3} align="center">
+                    <Typography variant="body2" color="text.secondary">
+                      No data available
+                    </Typography>
+                  </TableCell>
+                </TableRow>
               )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
 
-      {/* Recent Organizations */}
-      <div className="dashboard-section">
-        <h2>Recent Organizations</h2>
-        <div className="table-container">
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Organization Name</th>
-                <th>Email</th>
-                <th>Subdomain</th>
-                <th>Status</th>
-                <th>Created</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
+      <Paper sx={{ p: 3, mb: 3 }}>
+        <Typography variant="h6" component="h2" fontWeight="bold" gutterBottom>
+          Recent Organizations
+        </Typography>
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Organization Name</TableCell>
+                <TableCell>Email</TableCell>
+                <TableCell>Subdomain</TableCell>
+                <TableCell>Status</TableCell>
+                <TableCell>Created</TableCell>
+                <TableCell align="right">Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
               {stats?.recentOrganizations?.length > 0 ? (
                 stats.recentOrganizations.map((org) => (
-                  <tr key={org._id}>
-                    <td>{org.organizationName}</td>
-                    <td>{org.email}</td>
-                    <td>{org.subdomain}</td>
-                    <td>
-                      <span className={`status-badge ${org.isActive ? 'status-active' : 'status-inactive'}`}>
-                        {org.isActive ? 'Active' : 'Inactive'}
-                      </span>
-                    </td>
-                    <td>{new Date(org.createdAt).toLocaleDateString()}</td>
-                    <td>
-                      <button
-                        className="btn-small btn-primary"
+                  <TableRow key={org._id}>
+                    <TableCell>{org.organizationName}</TableCell>
+                    <TableCell>{org.email}</TableCell>
+                    <TableCell>
+                      <Chip label={org.subdomain} size="small" variant="outlined" />
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        label={org.isActive ? 'Active' : 'Inactive'}
+                        color={org.isActive ? 'success' : 'default'}
+                        size="small"
+                      />
+                    </TableCell>
+                    <TableCell>{new Date(org.createdAt).toLocaleDateString()}</TableCell>
+                    <TableCell align="right">
+                      <Button
+                        size="small"
+                        variant="outlined"
                         onClick={() => navigate(`/owner/organizations/${org._id}`)}
                       >
                         View
-                      </button>
-                    </td>
-                  </tr>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
                 ))
               ) : (
-                <tr>
-                  <td colSpan="6" style={{ textAlign: 'center' }}>No organizations yet</td>
-                </tr>
+                <TableRow>
+                  <TableCell colSpan={6} align="center">
+                    <Typography variant="body2" color="text.secondary">
+                      No organizations yet
+                    </Typography>
+                  </TableCell>
+                </TableRow>
               )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
 
-      {/* Quick Actions */}
-      <div className="dashboard-section">
-        <h2>Quick Actions</h2>
-        <div className="actions-grid">
-          <button
-            className="action-button"
-            onClick={() => navigate('/owner/organizations')}
-          >
-            <span className="action-icon">🏢</span>
-            <span>Manage Organizations</span>
-          </button>
-          <button
-            className="action-button"
-            onClick={() => navigate('/owner/meetings')}
-          >
-            <span className="action-icon">📅</span>
-            <span>View All Meetings</span>
-          </button>
-          <button
-            className="action-button"
-            onClick={() => navigate('/owner/registrants')}
-          >
-            <span className="action-icon">👥</span>
-            <span>View All Registrants</span>
-          </button>
-          <button
-            className="action-button"
-            onClick={() => navigate('/owner/zoom-settings')}
-          >
-            <span className="action-icon">🎥</span>
-            <span>Zoom API Settings</span>
-          </button>
-        </div>
-      </div>
-    </div>
+      <Paper sx={{ p: 3 }}>
+        <Typography variant="h6" component="h2" fontWeight="bold" gutterBottom>
+          Quick Actions
+        </Typography>
+        <Grid container spacing={2}>
+          {quickActions.map((action, index) => (
+            <Grid item xs={12} sm={6} md={3} key={index}>
+              <Button
+                variant="outlined"
+                fullWidth
+                startIcon={action.icon}
+                onClick={action.onClick}
+                sx={{ py: 2, justifyContent: 'flex-start' }}
+              >
+                {action.label}
+              </Button>
+            </Grid>
+          ))}
+        </Grid>
+      </Paper>
+    </Container>
   );
 }
 

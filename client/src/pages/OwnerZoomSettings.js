@@ -1,8 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  Container,
+  Box,
+  Typography,
+  Button,
+  TextField,
+  Paper,
+  CircularProgress,
+  Alert,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+} from '@mui/material';
+import {
+  Dashboard as DashboardIcon,
+  Search as SearchIcon,
+} from '@mui/icons-material';
 import axios from 'axios';
 import { getOwnerToken } from '../utils/ownerAuth';
-import './Meetings.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
@@ -101,179 +125,189 @@ function OwnerZoomSettings() {
   };
 
   return (
-    <div className="meetings-container">
-      <div className="page-header">
-        <h1>Zoom API Settings</h1>
-        <button className="btn-primary" onClick={() => navigate('/owner/dashboard')}>
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h4" component="h1" fontWeight="bold">
+          Zoom API Settings
+        </Typography>
+        <Button
+          variant="contained"
+          startIcon={<DashboardIcon />}
+          onClick={() => navigate('/owner/dashboard')}
+        >
           Back to Dashboard
-        </button>
-      </div>
+        </Button>
+      </Box>
 
-      {/* Search */}
-      <div className="filters-section">
-        <div className="search-bar">
-          <input
-            type="text"
-            placeholder="Search by organization name or subdomain..."
-            value={searchTerm}
-            onChange={handleSearch}
-          />
-        </div>
-      </div>
+      <Paper sx={{ p: 2, mb: 3 }}>
+        <TextField
+          placeholder="Search by organization name or subdomain..."
+          value={searchTerm}
+          onChange={handleSearch}
+          size="small"
+          fullWidth
+          InputProps={{
+            startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />,
+          }}
+        />
+      </Paper>
 
-      {error && <div className="error-message">{error}</div>}
-
-      {/* Edit Modal */}
-      {editingOrg && (
-        <div className="modal-overlay" onClick={handleCancelEdit}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h2>Edit Zoom Credentials</h2>
-            <p>Organization: <strong>{editingOrg.organizationName}</strong></p>
-            <p>Subdomain: <code>{editingOrg.subdomain}</code></p>
-
-            <div className="form-group">
-              <label>Zoom Account ID:</label>
-              <input
-                type="text"
-                value={zoomCredentials.zoomAccountId}
-                onChange={(e) => setZoomCredentials({ ...zoomCredentials, zoomAccountId: e.target.value })}
-                placeholder="Enter Zoom Account ID"
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Zoom Client ID:</label>
-              <input
-                type="text"
-                value={zoomCredentials.zoomClientId}
-                onChange={(e) => setZoomCredentials({ ...zoomCredentials, zoomClientId: e.target.value })}
-                placeholder="Enter Zoom Client ID"
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Zoom Client Secret:</label>
-              <input
-                type="password"
-                value={zoomCredentials.zoomClientSecret}
-                onChange={(e) => setZoomCredentials({ ...zoomCredentials, zoomClientSecret: e.target.value })}
-                placeholder="Enter Zoom Client Secret"
-              />
-            </div>
-
-            <div className="modal-actions">
-              <button
-                className="btn-primary"
-                onClick={handleSaveZoom}
-                disabled={saving}
-              >
-                {saving ? 'Saving...' : 'Save Credentials'}
-              </button>
-              <button
-                className="btn-secondary"
-                onClick={handleCancelEdit}
-                disabled={saving}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
 
       {loading ? (
-        <p>Loading organizations...</p>
+        <Box sx={{ textAlign: 'center', py: 4 }}>
+          <CircularProgress />
+          <Typography sx={{ mt: 2 }}>Loading organizations...</Typography>
+        </Box>
       ) : (
         <>
-          <div className="table-container">
-            <table className="meetings-table">
-              <thead>
-                <tr>
-                  <th>Organization Name</th>
-                  <th>Subdomain</th>
-                  <th>Zoom Account ID</th>
-                  <th>Zoom Client ID</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Organization Name</TableCell>
+                  <TableCell>Subdomain</TableCell>
+                  <TableCell>Zoom Account ID</TableCell>
+                  <TableCell>Zoom Client ID</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell align="right">Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
                 {organizations.length > 0 ? (
                   organizations.map((org) => (
-                    <tr key={org._id}>
-                      <td>
-                        <strong>{org.organizationName}</strong>
-                      </td>
-                      <td>
-                        <code>{org.subdomain}</code>
-                      </td>
-                      <td>
+                    <TableRow key={org._id}>
+                      <TableCell>
+                        <Typography fontWeight="bold">{org.organizationName}</Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Chip label={org.subdomain} size="small" variant="outlined" />
+                      </TableCell>
+                      <TableCell>
                         {org.zoomAccountId ? (
-                          <span title={org.zoomAccountId}>
+                          <Typography variant="body2" title={org.zoomAccountId}>
                             {org.zoomAccountId.substring(0, 15)}...
-                          </span>
+                          </Typography>
                         ) : (
-                          <span style={{ color: '#999' }}>Not set</span>
+                          <Typography variant="body2" color="text.secondary">Not set</Typography>
                         )}
-                      </td>
-                      <td>
+                      </TableCell>
+                      <TableCell>
                         {org.zoomClientId ? (
-                          <span title={org.zoomClientId}>
+                          <Typography variant="body2" title={org.zoomClientId}>
                             {org.zoomClientId.substring(0, 15)}...
-                          </span>
+                          </Typography>
                         ) : (
-                          <span style={{ color: '#999' }}>Not set</span>
+                          <Typography variant="body2" color="text.secondary">Not set</Typography>
                         )}
-                      </td>
-                      <td>
-                        <span className={`status-badge ${org.stats.hasZoomCredentials ? 'status-active' : 'status-inactive'}`}>
-                          {org.stats.hasZoomCredentials ? 'Configured' : 'Not Configured'}
-                        </span>
-                      </td>
-                      <td>
-                        <button
-                          className="btn-small btn-primary"
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={org.stats.hasZoomCredentials ? 'Configured' : 'Not Configured'}
+                          color={org.stats.hasZoomCredentials ? 'success' : 'default'}
+                          size="small"
+                        />
+                      </TableCell>
+                      <TableCell align="right">
+                        <Button
+                          size="small"
+                          variant="outlined"
                           onClick={() => handleEditZoom(org._id)}
                         >
                           Edit Credentials
-                        </button>
-                      </td>
-                    </tr>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
                   ))
                 ) : (
-                  <tr>
-                    <td colSpan="6" style={{ textAlign: 'center' }}>
-                      No organizations found
-                    </td>
-                  </tr>
+                  <TableRow>
+                    <TableCell colSpan={6} align="center">
+                      <Typography variant="body2" color="text.secondary">
+                        No organizations found
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
                 )}
-              </tbody>
-            </table>
-          </div>
+              </TableBody>
+            </Table>
+          </TableContainer>
 
-          {/* Pagination */}
           {pagination.pages > 1 && (
-            <div className="pagination">
-              <button
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2, mt: 3 }}>
+              <Button
                 onClick={() => setPagination({ ...pagination, page: pagination.page - 1 })}
                 disabled={pagination.page === 1}
               >
                 Previous
-              </button>
-              <span>
+              </Button>
+              <Typography>
                 Page {pagination.page} of {pagination.pages} ({pagination.total} total)
-              </span>
-              <button
+              </Typography>
+              <Button
                 onClick={() => setPagination({ ...pagination, page: pagination.page + 1 })}
                 disabled={pagination.page === pagination.pages}
               >
                 Next
-              </button>
-            </div>
+              </Button>
+            </Box>
           )}
         </>
       )}
-    </div>
+
+      <Dialog
+        open={!!editingOrg}
+        onClose={handleCancelEdit}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Edit Zoom Credentials</DialogTitle>
+        <DialogContent>
+          <Box sx={{ pt: 2 }}>
+            <Typography variant="body2" gutterBottom>
+              Organization: <strong>{editingOrg?.organizationName}</strong>
+            </Typography>
+            <Typography variant="body2" gutterBottom sx={{ mb: 3 }}>
+              Subdomain: <Chip label={editingOrg?.subdomain} size="small" variant="outlined" />
+            </Typography>
+
+            <TextField
+              label="Zoom Account ID"
+              value={zoomCredentials.zoomAccountId}
+              onChange={(e) => setZoomCredentials({ ...zoomCredentials, zoomAccountId: e.target.value })}
+              placeholder="Enter Zoom Account ID"
+              fullWidth
+              sx={{ mb: 2 }}
+            />
+
+            <TextField
+              label="Zoom Client ID"
+              value={zoomCredentials.zoomClientId}
+              onChange={(e) => setZoomCredentials({ ...zoomCredentials, zoomClientId: e.target.value })}
+              placeholder="Enter Zoom Client ID"
+              fullWidth
+              sx={{ mb: 2 }}
+            />
+
+            <TextField
+              label="Zoom Client Secret"
+              type="password"
+              value={zoomCredentials.zoomClientSecret}
+              onChange={(e) => setZoomCredentials({ ...zoomCredentials, zoomClientSecret: e.target.value })}
+              placeholder="Enter Zoom Client Secret"
+              fullWidth
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancelEdit} disabled={saving}>
+            Cancel
+          </Button>
+          <Button onClick={handleSaveZoom} variant="contained" disabled={saving}>
+            {saving ? 'Saving...' : 'Save Credentials'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Container>
   );
 }
 
