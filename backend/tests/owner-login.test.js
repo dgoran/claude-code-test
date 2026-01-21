@@ -121,7 +121,7 @@ describe('Owner Login API - Functionality Tests', () => {
     // Simulating the login route logic
     const loginData = {
       email: 'admin',  // Username
-      password: 'admin'
+      password: 'admin123'
     };
 
     // Should normalize to lowercase
@@ -182,25 +182,25 @@ describe('Default Owner Setup', () => {
     const defaultOwnerData = {
       name: 'System Administrator',
       email: 'admin',  // Username, not email!
-      password: 'admin',
+      password: 'admin123',
       role: 'owner',
       isActive: true
     };
 
     expect(defaultOwnerData.email).toBe('admin');
     expect(defaultOwnerData.email).not.toContain('@');
-    expect(defaultOwnerData.password).toBe('admin');
+    expect(defaultOwnerData.password).toBe('admin123');
   });
 
   test('default owner credentials match expected values', () => {
     // These are the credentials users should use to log in
     const expectedCredentials = {
       username: 'admin',
-      password: 'admin'
+      password: 'admin123'
     };
 
     expect(expectedCredentials.username).toBe('admin');
-    expect(expectedCredentials.password).toBe('admin');
+    expect(expectedCredentials.password).toBe('admin123');
   });
 });
 
@@ -271,7 +271,7 @@ describe('Manual Test Scenarios', () => {
       endpoint: 'POST /api/owners/login',
       requestBody: {
         email: 'admin',
-        password: 'admin'
+        password: 'admin123'
       },
       expectedResponse: {
         status: 200,
@@ -289,7 +289,7 @@ describe('Manual Test Scenarios', () => {
       },
       curlCommand: `curl -X POST http://localhost:5000/api/owners/login \\
   -H "Content-Type: application/json" \\
-  -d '{"email": "admin", "password": "admin"}'`
+  -d '{"email": "admin", "password": "admin123"}'`
     };
 
     expect(testScenario.requestBody.email).toBe('admin');
@@ -387,7 +387,7 @@ console.log('  - Email/username is normalized to lowercase');
 console.log('');
 console.log('✓ Default credentials:');
 console.log('  - Username: admin');
-console.log('  - Password: admin');
+console.log('  - Password: admin123');
 console.log('');
 console.log('✓ Key implementation details:');
 console.log('  - Model: backend/models/Owner.js (line 12: "Email or username is required")');
