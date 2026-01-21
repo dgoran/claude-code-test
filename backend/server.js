@@ -32,6 +32,12 @@ app.use(cors({
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// Set Permissions-Policy header to allow clipboard access
+app.use((req, res, next) => {
+  res.setHeader('Permissions-Policy', 'clipboard-read=*, clipboard-write=*');
+  next();
+});
+
 // Routes
 app.use('/api/organizations', organizationRoutes);
 app.use('/api/meetings', meetingRoutes);
