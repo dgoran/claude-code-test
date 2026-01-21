@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "npx nodemon server.js"
+    "dev": "npx nodemon server.js",
+    "seed:admin": "node scripts/seedAdmin.js"
   },
   "keywords": ["zoom", "registration", "webinar", "meeting", "api"],
   "author": "",
