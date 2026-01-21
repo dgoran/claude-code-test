@@ -1,8 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
+import {
+  Container,
+  Box,
+  Typography,
+  Button,
+  Grid,
+  Card,
+  CardContent,
+  CircularProgress,
+  Alert,
+  AlertTitle,
+  Link,
+  Paper,
+} from '@mui/material';
+import {
+  Add as AddIcon,
+  Event as EventIcon,
+  People as PeopleIcon,
+  CloudDone as CloudDoneIcon,
+  Domain as DomainIcon,
+} from '@mui/icons-material';
 import { getMeetings, getRegistrants } from '../utils/api';
 import { getOrganization } from '../utils/auth';
-import './Dashboard.css';
 
 const Dashboard = () => {
   const [meetings, setMeetings] = useState([]);
@@ -32,9 +52,10 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="container">
-        <div className="loading">Loading dashboard...</div>
-      </div>
+      <Container maxWidth="lg" sx={{ py: 4, textAlign: 'center' }}>
+        <CircularProgress />
+        <Typography sx={{ mt: 2 }}>Loading dashboard...</Typography>
+      </Container>
     );
   }
 
@@ -42,70 +63,127 @@ const Dashboard = () => {
   const totalRegistrants = registrants.length;
   const syncedRegistrants = registrants.filter(r => r.syncedToZoom).length;
 
+  const stats = [
+    {
+      icon: <EventIcon sx={{ fontSize: 40 }} />,
+      value: activeMeetings.length,
+      label: 'Active Meetings',
+      color: 'primary.main',
+    },
+    {
+      icon: <PeopleIcon sx={{ fontSize: 40 }} />,
+      value: totalRegistrants,
+      label: 'Total Registrants',
+      color: 'success.main',
+    },
+    {
+      icon: <CloudDoneIcon sx={{ fontSize: 40 }} />,
+      value: syncedRegistrants,
+      label: 'Synced to Zoom',
+      color: 'info.main',
+    },
+    {
+      icon: <DomainIcon sx={{ fontSize: 40 }} />,
+      value: organization?.subdomain,
+      label: 'Your Subdomain',
+      color: 'secondary.main',
+    },
+  ];
+
   return (
-    <div className="container">
-      <div className="dashboard-header">
-        <h1>Welcome, {organization?.organizationName}</h1>
-        <Link to="/meetings/create">
-          <button className="btn btn-primary">Create New Meeting</button>
-        </Link>
-      </div>
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+        <Typography variant="h4" component="h1" fontWeight="bold">
+          Welcome, {organization?.organizationName}
+        </Typography>
+        <Button
+          component={RouterLink}
+          to="/meetings/create"
+          variant="contained"
+          startIcon={<AddIcon />}
+          size="large"
+        >
+          Create New Meeting
+        </Button>
+      </Box>
 
-        <div className="stats-grid">
-          <div className="stat-card">
-            <h3>{activeMeetings.length}</h3>
-            <p>Active Meetings</p>
-          </div>
-          <div className="stat-card">
-            <h3>{totalRegistrants}</h3>
-            <p>Total Registrants</p>
-          </div>
-          <div className="stat-card">
-            <h3>{syncedRegistrants}</h3>
-            <p>Synced to Zoom</p>
-          </div>
-          <div className="stat-card">
-            <h3>{organization?.subdomain}</h3>
-            <p>Your Subdomain</p>
-          </div>
-        </div>
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        {stats.map((stat, index) => (
+          <Grid item xs={12} sm={6} md={3} key={index}>
+            <Card>
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                  <Box sx={{ color: stat.color, mr: 2 }}>{stat.icon}</Box>
+                </Box>
+                <Typography variant="h3" component="div" fontWeight="bold">
+                  {stat.value}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {stat.label}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
 
-        <div className="dashboard-section">
-          <h2>Recent Meetings</h2>
-          {meetings.length > 0 ? (
-            <div className="meetings-list">
-              {meetings.slice(0, 5).map((meeting) => (
-                <div key={meeting._id} className="meeting-card-small">
-                  <div>
-                    <h3>{meeting.meetingName}</h3>
-                    <p>
-                      {meeting.meetingType === 'webinar' ? 'Webinar' : 'Meeting'} •
+      <Paper sx={{ p: 3, mb: 3 }}>
+        <Typography variant="h5" component="h2" gutterBottom fontWeight="bold">
+          Recent Meetings
+        </Typography>
+        {meetings.length > 0 ? (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
+            {meetings.slice(0, 5).map((meeting) => (
+              <Card key={meeting._id} variant="outlined">
+                <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Box>
+                    <Typography variant="h6" component="h3" fontWeight="bold">
+                      {meeting.meetingName}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {meeting.meetingType === 'webinar' ? 'Webinar' : 'Meeting'} •{' '}
                       {new Date(meeting.startTime).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <Link to={`/meetings/${meeting._id}`}>
-                    <button className="btn btn-secondary">View Details</button>
-                  </Link>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="empty-state">
-              <p>No meetings yet. Create your first meeting to get started!</p>
-              <Link to="/meetings/create">
-                <button className="btn btn-primary">Create Meeting</button>
-              </Link>
-            </div>
-          )}
-        </div>
+                    </Typography>
+                  </Box>
+                  <Button
+                    component={RouterLink}
+                    to={`/meetings/${meeting._id}`}
+                    variant="outlined"
+                  >
+                    View Details
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </Box>
+        ) : (
+          <Box sx={{ textAlign: 'center', py: 4 }}>
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
+              No meetings yet. Create your first meeting to get started!
+            </Typography>
+            <Button
+              component={RouterLink}
+              to="/meetings/create"
+              variant="contained"
+              startIcon={<AddIcon />}
+            >
+              Create Meeting
+            </Button>
+          </Box>
+        )}
+      </Paper>
 
       {!organization?.hasZoomCredentials && (
-        <div className="alert alert-info">
-          <strong>Setup Required:</strong> Please add your Zoom API credentials in{' '}
-          <Link to="/settings">Settings</Link> to enable automatic registration syncing.
-        </div>
+        <Alert severity="info">
+          <AlertTitle>Setup Required</AlertTitle>
+          Please add your Zoom API credentials in{' '}
+          <Link component={RouterLink} to="/settings" underline="hover">
+            Settings
+          </Link>{' '}
+          to enable automatic registration syncing.
+        </Alert>
       )}
-    </div>
+    </Container>
   );
 };
 
