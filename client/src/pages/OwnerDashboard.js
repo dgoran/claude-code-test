@@ -198,6 +198,13 @@ function OwnerDashboard() {
             <span className="action-icon">👥</span>
             <span>View All Registrants</span>
           </button>
+          <button
+            className="action-button"
+            onClick={() => navigate('/owner/zoom-settings')}
+          >
+            <span className="action-icon">🎥</span>
+            <span>Zoom API Settings</span>
+          </button>
         </div>
       </div>
     </div>

@@ -481,4 +481,103 @@ router.get('/meetings', ownerAuth, async (req, res) => {
   }
 });
 
+// @route   DELETE /api/admin/meetings/:id
+// @desc    Delete meeting and all related registrants
+// @access  Private (Owner)
+router.delete('/meetings/:id', ownerAuth, async (req, res) => {
+  try {
+    const meeting = await Meeting.findById(req.params.id);
+
+    if (!meeting) {
+      return res.status(404).json({ message: 'Meeting not found' });
+    }
+
+    // Delete meeting and all related registrants
+    await Promise.all([
+      Registrant.deleteMany({ meetingId: meeting._id }),
+      Meeting.findByIdAndDelete(meeting._id)
+    ]);
+
+    res.json({ message: 'Meeting and all related registrants deleted successfully' });
+  } catch (error) {
+    console.error('Delete meeting error:', error);
+    res.status(500).json({ message: 'Error deleting meeting', error: error.message });
+  }
+});
+
+// @route   DELETE /api/admin/registrants/:id
+// @desc    Delete registrant
+// @access  Private (Owner)
+router.delete('/registrants/:id', ownerAuth, async (req, res) => {
+  try {
+    const registrant = await Registrant.findById(req.params.id);
+
+    if (!registrant) {
+      return res.status(404).json({ message: 'Registrant not found' });
+    }
+
+    await Registrant.findByIdAndDelete(registrant._id);
+
+    res.json({ message: 'Registrant deleted successfully' });
+  } catch (error) {
+    console.error('Delete registrant error:', error);
+    res.status(500).json({ message: 'Error deleting registrant', error: error.message });
+  }
+});
+
+// @route   GET /api/admin/organizations/:id/zoom-credentials
+// @desc    Get Zoom credentials for an organization
+// @access  Private (Owner)
+router.get('/organizations/:id/zoom-credentials', ownerAuth, async (req, res) => {
+  try {
+    const organization = await Organization.findById(req.params.id).select('organizationName subdomain zoomAccountId zoomClientId zoomClientSecret').lean();
+
+    if (!organization) {
+      return res.status(404).json({ message: 'Organization not found' });
+    }
+
+    res.json({
+      organizationId: organization._id,
+      organizationName: organization.organizationName,
+      subdomain: organization.subdomain,
+      zoomAccountId: organization.zoomAccountId || '',
+      zoomClientId: organization.zoomClientId || '',
+      zoomClientSecret: organization.zoomClientSecret || ''
+    });
+  } catch (error) {
+    console.error('Get Zoom credentials error:', error);
+    res.status(500).json({ message: 'Error fetching Zoom credentials', error: error.message });
+  }
+});
+
+// @route   PUT /api/admin/organizations/:id/zoom-credentials
+// @desc    Update Zoom credentials for an organization
+// @access  Private (Owner)
+router.put('/organizations/:id/zoom-credentials', ownerAuth, async (req, res) => {
+  try {
+    const { zoomAccountId, zoomClientId, zoomClientSecret } = req.body;
+
+    const organization = await Organization.findById(req.params.id);
+
+    if (!organization) {
+      return res.status(404).json({ message: 'Organization not found' });
+    }
+
+    // Update Zoom credentials
+    organization.zoomAccountId = zoomAccountId || '';
+    organization.zoomClientId = zoomClientId || '';
+    organization.zoomClientSecret = zoomClientSecret || '';
+
+    await organization.save();
+
+    res.json({
+      message: 'Zoom credentials updated successfully',
+      hasZoomCredentials: !!(zoomAccountId && zoomClientId && zoomClientSecret)
+    });
+  } catch (error) {
+    console.error('Update Zoom credentials error:', error);
+    res.status(500).json({ message: 'Error updating Zoom credentials', error: error.message });
+  }
+});
+
 module.exports = router;

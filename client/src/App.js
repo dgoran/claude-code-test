@@ -21,6 +21,7 @@ import OwnerOrganizationDetails from './pages/OwnerOrganizationDetails';
 import OwnerAllMeetings from './pages/OwnerAllMeetings';
 import OwnerAllRegistrants from './pages/OwnerAllRegistrants';
 import OwnerProfile from './pages/OwnerProfile';
+import OwnerZoomSettings from './pages/OwnerZoomSettings';
 import OwnerPrivateRoute from './components/OwnerPrivateRoute';
 import OwnerNavbar from './components/OwnerNavbar';
 import Navbar from './components/Navbar';
@@ -48,6 +49,7 @@ function App() {
         <Route path="/owner/organizations/:id" element={<OwnerPrivateRoute><><OwnerNavbar /><OwnerOrganizationDetails /></></OwnerPrivateRoute>} />
         <Route path="/owner/meetings" element={<OwnerPrivateRoute><><OwnerNavbar /><OwnerAllMeetings /></></OwnerPrivateRoute>} />
         <Route path="/owner/registrants" element={<OwnerPrivateRoute><><OwnerNavbar /><OwnerAllRegistrants /></></OwnerPrivateRoute>} />
+        <Route path="/owner/zoom-settings" element={<OwnerPrivateRoute><><OwnerNavbar /><OwnerZoomSettings /></></OwnerPrivateRoute>} />
         <Route path="/owner/profile" element={<OwnerPrivateRoute><><OwnerNavbar /><OwnerProfile /></></OwnerPrivateRoute>} />
 
         {/* Public Landing and Registration Pages */}

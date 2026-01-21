@@ -45,6 +45,26 @@ function OwnerAllMeetings() {
     setPagination({ ...pagination, page: 1 });
   };
 
+  const handleDelete = async (meetingId, meetingName) => {
+    if (!window.confirm(
+      `Are you sure you want to DELETE "${meetingName}"?\n\nThis will permanently delete:\n- The meeting\n- All registrants for this meeting\n\nThis action CANNOT be undone!`
+    )) {
+      return;
+    }
+
+    try {
+      const token = getOwnerToken();
+      await axios.delete(`${API_URL}/admin/meetings/${meetingId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      alert('Meeting deleted successfully');
+      fetchMeetings();
+    } catch (err) {
+      console.error('Error deleting meeting:', err);
+      alert('Failed to delete meeting');
+    }
+  };
+
   return (
     <div className="meetings-container">
       <div className="page-header">
@@ -83,6 +103,7 @@ function OwnerAllMeetings() {
                   <th>Registrants</th>
                   <th>Status</th>
                   <th>Created</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -116,11 +137,20 @@ function OwnerAllMeetings() {
                         </span>
                       </td>
                       <td>{new Date(meeting.createdAt).toLocaleDateString()}</td>
+                      <td>
+                        <button
+                          className="btn-small btn-danger"
+                          onClick={() => handleDelete(meeting._id, meeting.meetingName)}
+                          title="Delete Meeting"
+                        >
+                          Delete
+                        </button>
+                      </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="7" style={{ textAlign: 'center' }}>
+                    <td colSpan="8" style={{ textAlign: 'center' }}>
                       No meetings found
                     </td>
                   </tr>
