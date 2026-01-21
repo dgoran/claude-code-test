@@ -55,10 +55,32 @@ const MeetingDetails = () => {
     }
   };
 
-  const copyLink = () => {
+  const copyLink = async () => {
     const link = `${window.location.origin}/${organization.subdomain}/${meeting._id}`;
-    navigator.clipboard.writeText(link);
-    alert('Registration link copied to clipboard!');
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(link);
+        alert('Registration link copied to clipboard!');
+      } else {
+        // Fallback for browsers that don't support clipboard API
+        const textArea = document.createElement('textarea');
+        textArea.value = link;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          alert('Registration link copied to clipboard!');
+        } catch (err) {
+          alert('Failed to copy link. Please copy manually.');
+        }
+        document.body.removeChild(textArea);
+      }
+    } catch (error) {
+      console.error('Failed to copy to clipboard:', error);
+      alert('Failed to copy link. Please copy manually.');
+    }
   };
 
   const exportCSV = () => {
