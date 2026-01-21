@@ -1,16 +1,11 @@
 .navbar {
   background-color: white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 15px 0;
-  margin-bottom: 30px;
-}
-
-.navbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   max-width: 1200px;
-  margin: 0 auto;
+  margin: 0 auto 30px auto;
   padding: 15px 20px;
 }
 
