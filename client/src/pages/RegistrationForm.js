@@ -1,7 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link as RouterLink } from 'react-router-dom';
+import {
+  Container,
+  Box,
+  Typography,
+  Button,
+  TextField,
+  Paper,
+  Alert,
+  CircularProgress,
+  Card,
+  CardContent,
+  Chip,
+} from '@mui/material';
+import {
+  CheckCircle as CheckCircleIcon,
+  ArrowBack as ArrowBackIcon,
+  Event as EventIcon,
+} from '@mui/icons-material';
 import { getPublicMeeting, registerForMeeting } from '../utils/api';
-import './RegistrationForm.css';
 
 const RegistrationForm = () => {
   const { subdomain, meetingId } = useParams();
@@ -84,78 +101,70 @@ const RegistrationForm = () => {
     if (formFields.length === 0) {
       return (
         <>
-          <div className="form-row">
-            <div className="form-group">
-              <label>First Name *</label>
-              <input
-                type="text"
-                name="firstName"
-                value={formData.firstName || ''}
-                onChange={handleChange}
-                placeholder="Enter your first name"
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Last Name *</label>
-              <input
-                type="text"
-                name="lastName"
-                value={formData.lastName || ''}
-                onChange={handleChange}
-                placeholder="Enter your last name"
-                required
-              />
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label>Email Address *</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email || ''}
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2, mb: 2 }}>
+            <TextField
+              label="First Name"
+              name="firstName"
+              value={formData.firstName || ''}
               onChange={handleChange}
-              placeholder="Enter your email address"
               required
+              fullWidth
+              placeholder="Enter your first name"
             />
-          </div>
 
-          <div className="form-group">
-            <label>Phone Number</label>
-            <input
-              type="tel"
-              name="phone"
-              value={formData.phone || ''}
+            <TextField
+              label="Last Name"
+              name="lastName"
+              value={formData.lastName || ''}
               onChange={handleChange}
-              placeholder="Enter your phone number (optional)"
+              required
+              fullWidth
+              placeholder="Enter your last name"
             />
-          </div>
+          </Box>
 
-          <div className="form-row">
-            <div className="form-group">
-              <label>Company</label>
-              <input
-                type="text"
-                name="company"
-                value={formData.company || ''}
-                onChange={handleChange}
-                placeholder="Enter your company name (optional)"
-              />
-            </div>
+          <TextField
+            label="Email Address"
+            name="email"
+            type="email"
+            value={formData.email || ''}
+            onChange={handleChange}
+            required
+            fullWidth
+            placeholder="Enter your email address"
+            sx={{ mb: 2 }}
+          />
 
-            <div className="form-group">
-              <label>Job Title</label>
-              <input
-                type="text"
-                name="jobTitle"
-                value={formData.jobTitle || ''}
-                onChange={handleChange}
-                placeholder="Enter your job title (optional)"
-              />
-            </div>
-          </div>
+          <TextField
+            label="Phone Number"
+            name="phone"
+            type="tel"
+            value={formData.phone || ''}
+            onChange={handleChange}
+            fullWidth
+            placeholder="Enter your phone number (optional)"
+            sx={{ mb: 2 }}
+          />
+
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>
+            <TextField
+              label="Company"
+              name="company"
+              value={formData.company || ''}
+              onChange={handleChange}
+              fullWidth
+              placeholder="Enter your company name (optional)"
+            />
+
+            <TextField
+              label="Job Title"
+              name="jobTitle"
+              value={formData.jobTitle || ''}
+              onChange={handleChange}
+              fullWidth
+              placeholder="Enter your job title (optional)"
+            />
+          </Box>
         </>
       );
     }
@@ -168,131 +177,193 @@ const RegistrationForm = () => {
         value: formData[field.fieldName] || '',
         onChange: handleChange,
         placeholder: `Enter ${field.fieldLabel.toLowerCase()}`,
-        required: field.isRequired
+        required: field.isRequired,
+        fullWidth: true,
       };
 
       return (
-        <div key={index} className="form-group">
-          <label>
-            {field.fieldLabel} {field.isRequired && '*'}
-          </label>
-          {isTextarea ? (
-            <textarea {...commonProps} rows="4" />
-          ) : (
-            <input {...commonProps} type={field.fieldType} />
-          )}
-          {field.fieldName === 'email' && (
-            <span className="form-hint">
-              You'll receive confirmation and join details at this email
-            </span>
-          )}
-        </div>
+        <Box key={index} sx={{ mb: 2 }}>
+          <TextField
+            {...commonProps}
+            label={field.fieldLabel}
+            type={isTextarea ? 'text' : field.fieldType}
+            multiline={isTextarea}
+            rows={isTextarea ? 4 : undefined}
+            helperText={field.fieldName === 'email' ? "You'll receive confirmation and join details at this email" : undefined}
+          />
+        </Box>
       );
     });
   };
 
   if (loading) {
     return (
-      <div className="registration-container">
-        <div className="loading">Loading...</div>
-      </div>
+      <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'grey.50' }}>
+        <CircularProgress />
+      </Box>
     );
   }
 
   if (error && !meeting) {
     return (
-      <div className="registration-container">
-        <div className="error-page">
-          <h1>404</h1>
-          <p>{error}</p>
-        </div>
-      </div>
+      <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'grey.50' }}>
+        <Container maxWidth="sm">
+          <Paper sx={{ p: 4, textAlign: 'center' }}>
+            <Typography variant="h1" sx={{ fontSize: '72px', mb: 2 }}>404</Typography>
+            <Typography variant="h6" color="text.secondary">{error}</Typography>
+          </Paper>
+        </Container>
+      </Box>
     );
   }
 
   if (success) {
     return (
-      <div className="registration-container">
-        <div className="success-page">
-          <div className="success-icon">✓</div>
-          <h2>Registration Successful!</h2>
-          <p className="success-message">
-            Thank you for registering, {registrationData?.firstName}!
-          </p>
+      <Box sx={{ minHeight: '100vh', bgcolor: 'grey.50', py: 4 }}>
+        <Container maxWidth="md">
+          <Paper sx={{ p: 4, textAlign: 'center' }}>
+            <CheckCircleIcon sx={{ fontSize: 80, color: 'success.main', mb: 2 }} />
+            <Typography variant="h4" component="h2" fontWeight="bold" gutterBottom>
+              Registration Successful!
+            </Typography>
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+              Thank you for registering, {registrationData?.firstName}!
+            </Typography>
 
-          <div className="success-details">
-            <h3>What's Next?</h3>
-            <ul>
-              <li>Check your email ({registrationData?.email}) for confirmation</li>
-              {registrationData?.zoomJoinUrl && (
-                <li>Save your unique join link (sent to your email)</li>
-              )}
-              {registrationData?.syncedToZoom ? (
-                <li>You've been successfully added to the Zoom {meeting.meetingType}</li>
-              ) : (
-                <li>You'll receive Zoom meeting details shortly</li>
-              )}
-              <li>Add the event to your calendar</li>
-            </ul>
+            <Card sx={{ mb: 3, bgcolor: 'grey.50' }}>
+              <CardContent>
+                <Typography variant="h6" gutterBottom fontWeight="bold">
+                  What's Next?
+                </Typography>
+                <Box component="ul" sx={{ textAlign: 'left', pl: 3 }}>
+                  <li>
+                    <Typography variant="body2">
+                      Check your email ({registrationData?.email}) for confirmation
+                    </Typography>
+                  </li>
+                  {registrationData?.zoomJoinUrl && (
+                    <li>
+                      <Typography variant="body2">
+                        Save your unique join link (sent to your email)
+                      </Typography>
+                    </li>
+                  )}
+                  {registrationData?.syncedToZoom ? (
+                    <li>
+                      <Typography variant="body2">
+                        You've been successfully added to the Zoom {meeting.meetingType}
+                      </Typography>
+                    </li>
+                  ) : (
+                    <li>
+                      <Typography variant="body2">
+                        You'll receive Zoom meeting details shortly
+                      </Typography>
+                    </li>
+                  )}
+                  <li>
+                    <Typography variant="body2">
+                      Add the event to your calendar
+                    </Typography>
+                  </li>
+                </Box>
+              </CardContent>
+            </Card>
 
-            <div className="meeting-summary">
-              <h4>{meeting.meetingName}</h4>
-              <p>{new Date(meeting.startTime).toLocaleString()}</p>
-              <p>{meeting.duration} minutes • {meeting.timezone}</p>
-            </div>
+            <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
+              <Typography variant="h6" fontWeight="bold" gutterBottom>
+                {meeting.meetingName}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {new Date(meeting.startTime).toLocaleString()}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {meeting.duration} minutes • {meeting.timezone}
+              </Typography>
+            </Paper>
 
-            <Link to={`/${subdomain}/${meetingId}`}>
-              <button className="btn btn-secondary">Back to Event Page</button>
-            </Link>
-          </div>
-        </div>
-      </div>
+            <Button
+              component={RouterLink}
+              to={`/${subdomain}/${meetingId}`}
+              variant="outlined"
+              startIcon={<ArrowBackIcon />}
+            >
+              Back to Event Page
+            </Button>
+          </Paper>
+        </Container>
+      </Box>
     );
   }
 
   return (
-    <div className="registration-container">
-      <div className="registration-header">
-        <Link to={`/${subdomain}/${meetingId}`} className="back-link">
-          ← Back to Event Details
-        </Link>
-        <h1>{organization?.organizationName}</h1>
-      </div>
+    <Box sx={{ minHeight: '100vh', bgcolor: 'grey.50', py: 4 }}>
+      <Container maxWidth="md">
+        <Box sx={{ mb: 3 }}>
+          <Button
+            component={RouterLink}
+            to={`/${subdomain}/${meetingId}`}
+            startIcon={<ArrowBackIcon />}
+            sx={{ mb: 2 }}
+          >
+            Back to Event Details
+          </Button>
+          <Typography variant="h4" component="h1" fontWeight="bold">
+            {organization?.organizationName}
+          </Typography>
+        </Box>
 
-      <div className="registration-content">
-        <div className="registration-card">
-          <div className="event-summary">
-            <span className="event-type">
-              {meeting.meetingType === 'webinar' ? 'Webinar' : 'Meeting'}
-            </span>
-            <h2>{meeting.meetingName}</h2>
-            <p className="event-time">
+        <Paper sx={{ p: 4 }}>
+          <Box sx={{ mb: 3 }}>
+            <Chip
+              label={meeting.meetingType === 'webinar' ? 'Webinar' : 'Meeting'}
+              color="primary"
+              size="small"
+              icon={<EventIcon />}
+              sx={{ mb: 2 }}
+            />
+            <Typography variant="h5" component="h2" fontWeight="bold" gutterBottom>
+              {meeting.meetingName}
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
               {new Date(meeting.startTime).toLocaleString()}
-            </p>
-          </div>
+            </Typography>
+          </Box>
 
-          <h3>Register for this Event</h3>
+          <Typography variant="h6" component="h3" fontWeight="bold" sx={{ mb: 3 }}>
+            Register for this Event
+          </Typography>
 
-          {error && <div className="alert alert-error">{error}</div>}
+          {error && (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              {error}
+            </Alert>
+          )}
 
-          <form onSubmit={handleSubmit}>
+          <Box component="form" onSubmit={handleSubmit}>
             {renderFormFields()}
 
-            <button
+            <Button
               type="submit"
-              className="btn btn-primary btn-block"
+              variant="contained"
+              fullWidth
+              size="large"
               disabled={submitting}
+              startIcon={submitting && <CircularProgress size={20} />}
+              sx={{ mt: 3 }}
             >
               {submitting ? 'Registering...' : 'Complete Registration'}
-            </button>
-          </form>
-        </div>
-      </div>
+            </Button>
+          </Box>
+        </Paper>
 
-      <div className="registration-footer">
-        <p>Powered by Zoom Registration Platform</p>
-      </div>
-    </div>
+        <Box sx={{ textAlign: 'center', mt: 3 }}>
+          <Typography variant="body2" color="text.secondary">
+            Powered by Zoom Registration Platform
+          </Typography>
+        </Box>
+      </Container>
+    </Box>
   );
 };
 

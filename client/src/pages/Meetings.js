@@ -1,12 +1,38 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
+import {
+  Container,
+  Box,
+  Typography,
+  Button,
+  Grid,
+  Card,
+  CardContent,
+  CircularProgress,
+  Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Snackbar,
+  Alert,
+} from '@mui/material';
+import {
+  Add as AddIcon,
+  Visibility as VisibilityIcon,
+  ContentCopy as ContentCopyIcon,
+  Delete as DeleteIcon,
+} from '@mui/icons-material';
 import { getMeetings, deleteMeeting } from '../utils/api';
 import { getOrganization } from '../utils/auth';
-import './Meetings.css';
 
 const Meetings = () => {
   const [meetings, setMeetings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [meetingToDelete, setMeetingToDelete] = useState(null);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const organization = getOrganization();
 
   useEffect(() => {
@@ -24,14 +50,21 @@ const Meetings = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this meeting?')) {
-      try {
-        await deleteMeeting(id);
-        setMeetings(meetings.filter(m => m._id !== id));
-      } catch (error) {
-        alert('Failed to delete meeting');
-      }
+  const handleDeleteClick = (meeting) => {
+    setMeetingToDelete(meeting);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    try {
+      await deleteMeeting(meetingToDelete._id);
+      setMeetings(meetings.filter(m => m._id !== meetingToDelete._id));
+      setSnackbar({ open: true, message: 'Meeting deleted successfully', severity: 'success' });
+    } catch (error) {
+      setSnackbar({ open: true, message: 'Failed to delete meeting', severity: 'error' });
+    } finally {
+      setDeleteDialogOpen(false);
+      setMeetingToDelete(null);
     }
   };
 
@@ -40,9 +73,8 @@ const Meetings = () => {
     try {
       if (navigator.clipboard && navigator.clipboard.writeText) {
         await navigator.clipboard.writeText(link);
-        alert('Link copied to clipboard!');
+        setSnackbar({ open: true, message: 'Link copied to clipboard!', severity: 'success' });
       } else {
-        // Fallback for browsers that don't support clipboard API
         const textArea = document.createElement('textarea');
         textArea.value = link;
         textArea.style.position = 'fixed';
@@ -51,78 +83,149 @@ const Meetings = () => {
         textArea.select();
         try {
           document.execCommand('copy');
-          alert('Link copied to clipboard!');
+          setSnackbar({ open: true, message: 'Link copied to clipboard!', severity: 'success' });
         } catch (err) {
-          alert('Failed to copy link. Please copy manually.');
+          setSnackbar({ open: true, message: 'Failed to copy link', severity: 'error' });
         }
         document.body.removeChild(textArea);
       }
     } catch (error) {
       console.error('Failed to copy to clipboard:', error);
-      alert('Failed to copy link. Please copy manually.');
+      setSnackbar({ open: true, message: 'Failed to copy link', severity: 'error' });
     }
   };
 
   if (loading) {
     return (
-      <div className="container">
-        <div className="loading">Loading meetings...</div>
-      </div>
+      <Container maxWidth="lg" sx={{ py: 4, textAlign: 'center' }}>
+        <CircularProgress />
+        <Typography sx={{ mt: 2 }}>Loading meetings...</Typography>
+      </Container>
     );
   }
 
   return (
-    <div className="container">
-      <div className="page-header">
-        <h1>My Meetings & Webinars</h1>
-        <Link to="/meetings/create">
-          <button className="btn btn-primary">Create New Meeting</button>
-        </Link>
-      </div>
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+        <Typography variant="h4" component="h1" fontWeight="bold">
+          My Meetings & Webinars
+        </Typography>
+        <Button
+          component={RouterLink}
+          to="/meetings/create"
+          variant="contained"
+          startIcon={<AddIcon />}
+          size="large"
+        >
+          Create New Meeting
+        </Button>
+      </Box>
 
-        {meetings.length > 0 ? (
-          <div className="meetings-grid">
-            {meetings.map((meeting) => (
-              <div key={meeting._id} className="meeting-card">
-                <div className="meeting-card-header">
-                  <h3>{meeting.meetingName}</h3>
-                  <span className={`badge ${meeting.isActive ? 'badge-success' : 'badge-secondary'}`}>
-                    {meeting.isActive ? 'Active' : 'Inactive'}
-                  </span>
-                </div>
-                <p className="meeting-type">
-                  {meeting.meetingType === 'webinar' ? 'Webinar' : 'Meeting'}
-                </p>
-                <p className="meeting-date">
-                  {new Date(meeting.startTime).toLocaleString()} • {meeting.duration} min
-                </p>
-                {meeting.description && (
-                  <p className="meeting-description">{meeting.description}</p>
-                )}
-                <div className="meeting-actions">
-                  <Link to={`/meetings/${meeting._id}`}>
-                    <button className="btn btn-primary">View Details</button>
-                  </Link>
-                  <button onClick={() => copyLink(meeting._id)} className="btn btn-secondary">
-                    Copy Link
-                  </button>
-                  <button onClick={() => handleDelete(meeting._id)} className="btn btn-danger">
-                    Delete
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="empty-state">
-            <h2>No meetings yet</h2>
-            <p>Create your first meeting or webinar to get started</p>
-            <Link to="/meetings/create">
-              <button className="btn btn-primary">Create Meeting</button>
-            </Link>
-          </div>
-        )}
-    </div>
+      {meetings.length > 0 ? (
+        <Grid container spacing={3}>
+          {meetings.map((meeting) => (
+            <Grid item xs={12} md={6} key={meeting._id}>
+              <Card>
+                <CardContent>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 2 }}>
+                    <Typography variant="h6" component="h3" fontWeight="bold">
+                      {meeting.meetingName}
+                    </Typography>
+                    <Chip
+                      label={meeting.isActive ? 'Active' : 'Inactive'}
+                      color={meeting.isActive ? 'success' : 'default'}
+                      size="small"
+                    />
+                  </Box>
+                  <Typography variant="body2" color="text.secondary" gutterBottom>
+                    {meeting.meetingType === 'webinar' ? 'Webinar' : 'Meeting'}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" gutterBottom>
+                    {new Date(meeting.startTime).toLocaleString()} • {meeting.duration} min
+                  </Typography>
+                  {meeting.description && (
+                    <Typography variant="body2" sx={{ mt: 1, mb: 2 }}>
+                      {meeting.description}
+                    </Typography>
+                  )}
+                  <Box sx={{ display: 'flex', gap: 1, mt: 2, flexWrap: 'wrap' }}>
+                    <Button
+                      component={RouterLink}
+                      to={`/meetings/${meeting._id}`}
+                      variant="contained"
+                      startIcon={<VisibilityIcon />}
+                      size="small"
+                    >
+                      View Details
+                    </Button>
+                    <Button
+                      onClick={() => copyLink(meeting._id)}
+                      variant="outlined"
+                      startIcon={<ContentCopyIcon />}
+                      size="small"
+                    >
+                      Copy Link
+                    </Button>
+                    <Button
+                      onClick={() => handleDeleteClick(meeting)}
+                      variant="outlined"
+                      color="error"
+                      startIcon={<DeleteIcon />}
+                      size="small"
+                    >
+                      Delete
+                    </Button>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      ) : (
+        <Box sx={{ textAlign: 'center', py: 8 }}>
+          <Typography variant="h5" component="h2" gutterBottom>
+            No meetings yet
+          </Typography>
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+            Create your first meeting or webinar to get started
+          </Typography>
+          <Button
+            component={RouterLink}
+            to="/meetings/create"
+            variant="contained"
+            startIcon={<AddIcon />}
+            size="large"
+          >
+            Create Meeting
+          </Button>
+        </Box>
+      )}
+
+      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
+        <DialogTitle>Delete Meeting</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete "{meetingToDelete?.meetingName}"? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+          <Button onClick={handleDeleteConfirm} color="error" variant="contained">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+      >
+        <Alert severity={snackbar.severity} onClose={() => setSnackbar({ ...snackbar, open: false })}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+    </Container>
   );
 };
 

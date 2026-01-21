@@ -1,6 +1,22 @@
 import React, { useState } from 'react';
+import {
+  Box,
+  Typography,
+  Checkbox,
+  FormControlLabel,
+  Button,
+  TextField,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Paper,
+  Grid,
+  Chip,
+  Alert,
+} from '@mui/material';
+import { Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
 
-// Standard Zoom fields that can be enabled
 const STANDARD_ZOOM_FIELDS = [
   { name: 'firstName', label: 'First Name', type: 'text', zoomKey: 'first_name', required: true, alwaysEnabled: true },
   { name: 'lastName', label: 'Last Name', type: 'text', zoomKey: 'last_name', required: false },
@@ -25,21 +41,18 @@ function FormBuilder({ formFields, onChange }) {
   const [customFieldLabel, setCustomFieldLabel] = useState('');
   const [customFieldType, setCustomFieldType] = useState('text');
   const [showAddCustomField, setShowAddCustomField] = useState(false);
+  const [error, setError] = useState('');
 
-  // Get enabled field names
   const enabledFieldNames = formFields.map(f => f.fieldName);
 
-  // Toggle a standard Zoom field
   const toggleStandardField = (field) => {
-    if (field.alwaysEnabled) return; // Can't disable required fields
+    if (field.alwaysEnabled) return;
 
     const isEnabled = enabledFieldNames.includes(field.name);
 
     if (isEnabled) {
-      // Remove the field
       onChange(formFields.filter(f => f.fieldName !== field.name));
     } else {
-      // Add the field
       const newField = {
         fieldName: field.name,
         fieldLabel: field.label,
@@ -54,10 +67,9 @@ function FormBuilder({ formFields, onChange }) {
     }
   };
 
-  // Add a custom field
   const addCustomField = () => {
     if (!customFieldName || !customFieldLabel) {
-      alert('Please provide both field name and label');
+      setError('Please provide both field name and label');
       return;
     }
 
@@ -77,235 +89,213 @@ function FormBuilder({ formFields, onChange }) {
     setCustomFieldLabel('');
     setCustomFieldType('text');
     setShowAddCustomField(false);
+    setError('');
   };
 
-  // Remove a custom field
   const removeCustomField = (fieldName) => {
     onChange(formFields.filter(f => f.fieldName !== fieldName));
   };
 
-  // Toggle required status
   const toggleRequired = (fieldName) => {
     onChange(formFields.map(f =>
       f.fieldName === fieldName ? { ...f, isRequired: !f.isRequired } : f
     ));
   };
 
-  // Get custom fields
   const customFields = formFields.filter(f => !f.isStandardZoomField);
 
   return (
-    <div style={{ marginBottom: '20px' }}>
-      <h3>Registration Form Fields</h3>
+    <Box sx={{ mb: 3 }}>
+      <Typography variant="h6" gutterBottom fontWeight="bold">
+        Registration Form Fields
+      </Typography>
 
-      <div style={{ marginBottom: '20px' }}>
-        <h4>Standard Zoom Fields</h4>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '10px' }}>
+      <Box sx={{ mb: 3 }}>
+        <Typography variant="subtitle1" gutterBottom fontWeight="bold">
+          Standard Zoom Fields
+        </Typography>
+        <Grid container spacing={1}>
           {STANDARD_ZOOM_FIELDS.map(field => {
             const isEnabled = enabledFieldNames.includes(field.name);
             const isAlwaysEnabled = field.alwaysEnabled;
 
             return (
-              <div key={field.name} style={{
-                padding: '10px',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                backgroundColor: isEnabled ? '#e3f2fd' : '#f5f5f5'
-              }}>
-                <label style={{ display: 'flex', alignItems: 'center', cursor: isAlwaysEnabled ? 'default' : 'pointer' }}>
-                  <input
-                    type="checkbox"
-                    checked={isEnabled}
-                    onChange={() => toggleStandardField(field)}
-                    disabled={isAlwaysEnabled}
-                    style={{ marginRight: '8px' }}
-                  />
-                  <span>
-                    {field.label}
-                    {field.required && <span style={{ color: 'red' }}> *</span>}
-                    {isAlwaysEnabled && <span style={{ fontSize: '0.8em', color: '#666' }}> (Required)</span>}
-                  </span>
-                </label>
-                {isEnabled && !isAlwaysEnabled && (
-                  <label style={{ display: 'block', marginTop: '5px', fontSize: '0.9em' }}>
-                    <input
-                      type="checkbox"
-                      checked={formFields.find(f => f.fieldName === field.name)?.isRequired || false}
-                      onChange={() => toggleRequired(field.name)}
-                      style={{ marginRight: '5px' }}
-                    />
-                    Required
-                  </label>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      <div style={{ marginBottom: '20px' }}>
-        <h4>Custom Fields</h4>
-        {customFields.length === 0 ? (
-          <p style={{ color: '#666', fontStyle: 'italic' }}>No custom fields added yet</p>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {customFields.map(field => (
-              <div key={field.fieldName} style={{
-                padding: '10px',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                backgroundColor: '#fff3e0',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center'
-              }}>
-                <div>
-                  <strong>{field.fieldLabel}</strong>
-                  <span style={{ marginLeft: '10px', fontSize: '0.9em', color: '#666' }}>
-                    ({field.fieldType})
-                  </span>
-                  <label style={{ marginLeft: '15px', fontSize: '0.9em' }}>
-                    <input
-                      type="checkbox"
-                      checked={field.isRequired}
-                      onChange={() => toggleRequired(field.fieldName)}
-                      style={{ marginRight: '5px' }}
-                    />
-                    Required
-                  </label>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => removeCustomField(field.fieldName)}
-                  style={{
-                    padding: '5px 10px',
-                    backgroundColor: '#f44336',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer'
+              <Grid item xs={12} sm={6} md={4} key={field.name}>
+                <Paper
+                  sx={{
+                    p: 1.5,
+                    bgcolor: isEnabled ? 'primary.light' : 'grey.100',
+                    opacity: isEnabled ? 1 : 0.7,
                   }}
                 >
-                  Remove
-                </button>
-              </div>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={isEnabled}
+                        onChange={() => toggleStandardField(field)}
+                        disabled={isAlwaysEnabled}
+                        size="small"
+                      />
+                    }
+                    label={
+                      <Typography variant="body2">
+                        {field.label}
+                        {field.required && <Box component="span" sx={{ color: 'error.main' }}> *</Box>}
+                        {isAlwaysEnabled && (
+                          <Box component="span" sx={{ fontSize: '0.8em', color: 'text.secondary' }}>
+                            {' '}(Required)
+                          </Box>
+                        )}
+                      </Typography>
+                    }
+                  />
+                  {isEnabled && !isAlwaysEnabled && (
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={formFields.find(f => f.fieldName === field.name)?.isRequired || false}
+                          onChange={() => toggleRequired(field.name)}
+                          size="small"
+                        />
+                      }
+                      label={<Typography variant="body2">Required</Typography>}
+                      sx={{ ml: 4, mt: 0.5 }}
+                    />
+                  )}
+                </Paper>
+              </Grid>
+            );
+          })}
+        </Grid>
+      </Box>
+
+      <Box sx={{ mb: 3 }}>
+        <Typography variant="subtitle1" gutterBottom fontWeight="bold">
+          Custom Fields
+        </Typography>
+        {customFields.length === 0 ? (
+          <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', mb: 2 }}>
+            No custom fields added yet
+          </Typography>
+        ) : (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
+            {customFields.map(field => (
+              <Paper key={field.fieldName} sx={{ p: 2, bgcolor: 'warning.light' }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Box>
+                    <Typography variant="body1" fontWeight="bold">
+                      {field.fieldLabel}
+                    </Typography>
+                    <Chip label={field.fieldType} size="small" sx={{ mr: 1 }} />
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={field.isRequired}
+                          onChange={() => toggleRequired(field.fieldName)}
+                          size="small"
+                        />
+                      }
+                      label={<Typography variant="body2">Required</Typography>}
+                    />
+                  </Box>
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    size="small"
+                    startIcon={<DeleteIcon />}
+                    onClick={() => removeCustomField(field.fieldName)}
+                  >
+                    Remove
+                  </Button>
+                </Box>
+              </Paper>
             ))}
-          </div>
+          </Box>
         )}
 
         {!showAddCustomField ? (
-          <button
-            type="button"
+          <Button
+            variant="contained"
+            color="success"
+            startIcon={<AddIcon />}
             onClick={() => setShowAddCustomField(true)}
-            style={{
-              marginTop: '10px',
-              padding: '10px 20px',
-              backgroundColor: '#4CAF50',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
-            }}
           >
             Add Custom Field
-          </button>
+          </Button>
         ) : (
-          <div style={{
-            marginTop: '10px',
-            padding: '15px',
-            border: '1px solid #ddd',
-            borderRadius: '4px',
-            backgroundColor: '#f9f9f9'
-          }}>
-            <h5>Add Custom Field</h5>
-            <div style={{ marginBottom: '10px' }}>
-              <label style={{ display: 'block', marginBottom: '5px' }}>Field Name (internal):</label>
-              <input
-                type="text"
-                value={customFieldName}
-                onChange={(e) => setCustomFieldName(e.target.value)}
-                placeholder="e.g., referralSource"
-                style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-              />
-            </div>
-            <div style={{ marginBottom: '10px' }}>
-              <label style={{ display: 'block', marginBottom: '5px' }}>Field Label (displayed):</label>
-              <input
-                type="text"
-                value={customFieldLabel}
-                onChange={(e) => setCustomFieldLabel(e.target.value)}
-                placeholder="e.g., How did you hear about us?"
-                style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-              />
-            </div>
-            <div style={{ marginBottom: '10px' }}>
-              <label style={{ display: 'block', marginBottom: '5px' }}>Field Type:</label>
-              <select
+          <Paper sx={{ p: 2, bgcolor: 'grey.50' }}>
+            <Typography variant="subtitle2" gutterBottom fontWeight="bold">
+              Add Custom Field
+            </Typography>
+            {error && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {error}
+              </Alert>
+            )}
+            <TextField
+              fullWidth
+              label="Field Name (internal)"
+              value={customFieldName}
+              onChange={(e) => setCustomFieldName(e.target.value)}
+              placeholder="e.g., referralSource"
+              size="small"
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              fullWidth
+              label="Field Label (displayed)"
+              value={customFieldLabel}
+              onChange={(e) => setCustomFieldLabel(e.target.value)}
+              placeholder="e.g., How did you hear about us?"
+              size="small"
+              sx={{ mb: 2 }}
+            />
+            <FormControl fullWidth size="small" sx={{ mb: 2 }}>
+              <InputLabel>Field Type</InputLabel>
+              <Select
                 value={customFieldType}
+                label="Field Type"
                 onChange={(e) => setCustomFieldType(e.target.value)}
-                style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
               >
-                <option value="text">Text</option>
-                <option value="textarea">Textarea</option>
-                <option value="email">Email</option>
-                <option value="tel">Phone</option>
-              </select>
-            </div>
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <button
-                type="button"
-                onClick={addCustomField}
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: '#2196F3',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer'
-                }}
-              >
+                <MenuItem value="text">Text</MenuItem>
+                <MenuItem value="textarea">Textarea</MenuItem>
+                <MenuItem value="email">Email</MenuItem>
+                <MenuItem value="tel">Phone</MenuItem>
+              </Select>
+            </FormControl>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Button variant="contained" onClick={addCustomField}>
                 Add Field
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
+                variant="outlined"
                 onClick={() => {
                   setShowAddCustomField(false);
                   setCustomFieldName('');
                   setCustomFieldLabel('');
                   setCustomFieldType('text');
-                }}
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: '#9E9E9E',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer'
+                  setError('');
                 }}
               >
                 Cancel
-              </button>
-            </div>
-          </div>
+              </Button>
+            </Box>
+          </Paper>
         )}
-      </div>
+      </Box>
 
-      <div style={{
-        padding: '10px',
-        backgroundColor: '#e8f5e9',
-        border: '1px solid #4CAF50',
-        borderRadius: '4px',
-        marginTop: '15px'
-      }}>
-        <strong>Total Fields: {formFields.length}</strong>
-        <span style={{ marginLeft: '15px' }}>
-          Standard: {formFields.filter(f => f.isStandardZoomField).length}
-        </span>
-        <span style={{ marginLeft: '15px' }}>
-          Custom: {customFields.length}
-        </span>
-      </div>
-    </div>
+      <Alert severity="success" icon={false}>
+        <Typography variant="body2">
+          <strong>Total Fields: {formFields.length}</strong>
+          <Box component="span" sx={{ ml: 2 }}>
+            Standard: {formFields.filter(f => f.isStandardZoomField).length}
+          </Box>
+          <Box component="span" sx={{ ml: 2 }}>
+            Custom: {customFields.length}
+          </Box>
+        </Typography>
+      </Alert>
+    </Box>
   );
 }
 

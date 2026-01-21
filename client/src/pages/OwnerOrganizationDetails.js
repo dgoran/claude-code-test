@@ -1,8 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import {
+  Container,
+  Box,
+  Typography,
+  Button,
+  Paper,
+  Grid,
+  Card,
+  CardContent,
+  CircularProgress,
+  Alert,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Chip,
+} from '@mui/material';
+import {
+  ArrowBack as ArrowBackIcon,
+  Event as EventIcon,
+  People as PeopleIcon,
+  CheckCircle as CheckCircleIcon,
+} from '@mui/icons-material';
 import axios from 'axios';
 import { getOwnerToken } from '../utils/ownerAuth';
-import './MeetingDetails.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
@@ -55,196 +79,266 @@ function OwnerOrganizationDetails() {
   };
 
   if (loading) {
-    return <div className="meeting-details-container"><p>Loading organization details...</p></div>;
+    return (
+      <Container maxWidth="lg" sx={{ py: 4, textAlign: 'center' }}>
+        <CircularProgress />
+        <Typography sx={{ mt: 2 }}>Loading organization details...</Typography>
+      </Container>
+    );
   }
 
   if (error) {
-    return <div className="meeting-details-container"><p className="error">{error}</p></div>;
+    return (
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Alert severity="error">{error}</Alert>
+      </Container>
+    );
   }
 
   const { organization, stats, recentMeetings, recentRegistrants, registrationTrend } = orgData;
 
   return (
-    <div className="meeting-details-container">
-      <div className="page-header">
-        <h1>{organization.organizationName}</h1>
-        <div>
-          <button className="btn-secondary" onClick={() => navigate('/owner/organizations')}>
-            Back to Organizations
-          </button>
-          <button
-            className={`btn-${organization.isActive ? 'warning' : 'success'}`}
-            onClick={handleToggleStatus}
-            style={{ marginLeft: '10px' }}
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Box>
+          <Button
+            startIcon={<ArrowBackIcon />}
+            onClick={() => navigate('/owner/organizations')}
+            sx={{ mb: 2 }}
           >
-            {organization.isActive ? 'Deactivate' : 'Activate'}
-          </button>
-        </div>
-      </div>
+            Back to Organizations
+          </Button>
+          <Typography variant="h4" component="h1" fontWeight="bold">
+            {organization.organizationName}
+          </Typography>
+        </Box>
+        <Button
+          variant="contained"
+          color={organization.isActive ? 'warning' : 'success'}
+          onClick={handleToggleStatus}
+        >
+          {organization.isActive ? 'Deactivate' : 'Activate'}
+        </Button>
+      </Box>
 
-      {/* Organization Info */}
-      <div className="details-section">
-        <h2>Organization Information</h2>
-        <div className="info-grid">
-          <div className="info-item">
-            <label>Organization Name:</label>
-            <span>{organization.organizationName}</span>
-          </div>
-          <div className="info-item">
-            <label>Email:</label>
-            <span>{organization.email}</span>
-          </div>
-          <div className="info-item">
-            <label>Subdomain:</label>
-            <span><code>{organization.subdomain}</code></span>
-          </div>
-          <div className="info-item">
-            <label>Status:</label>
-            <span className={`status-badge ${organization.isActive ? 'status-active' : 'status-inactive'}`}>
-              {organization.isActive ? 'Active' : 'Inactive'}
-            </span>
-          </div>
-          <div className="info-item">
-            <label>Created:</label>
-            <span>{new Date(organization.createdAt).toLocaleString()}</span>
-          </div>
-          <div className="info-item">
-            <label>Zoom Integration:</label>
-            <span>{stats.hasZoomCredentials ? '✅ Configured' : '❌ Not Configured'}</span>
-          </div>
-        </div>
-      </div>
+      <Paper sx={{ p: 3, mb: 3 }}>
+        <Typography variant="h6" component="h2" fontWeight="bold" gutterBottom>
+          Organization Information
+        </Typography>
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={6} md={4}>
+            <Typography variant="body2" color="text.secondary">Organization Name:</Typography>
+            <Typography variant="body1">{organization.organizationName}</Typography>
+          </Grid>
+          <Grid item xs={12} sm={6} md={4}>
+            <Typography variant="body2" color="text.secondary">Email:</Typography>
+            <Typography variant="body1">{organization.email}</Typography>
+          </Grid>
+          <Grid item xs={12} sm={6} md={4}>
+            <Typography variant="body2" color="text.secondary">Subdomain:</Typography>
+            <Chip label={organization.subdomain} size="small" variant="outlined" />
+          </Grid>
+          <Grid item xs={12} sm={6} md={4}>
+            <Typography variant="body2" color="text.secondary">Status:</Typography>
+            <Chip
+              label={organization.isActive ? 'Active' : 'Inactive'}
+              color={organization.isActive ? 'success' : 'default'}
+              size="small"
+            />
+          </Grid>
+          <Grid item xs={12} sm={6} md={4}>
+            <Typography variant="body2" color="text.secondary">Created:</Typography>
+            <Typography variant="body1">{new Date(organization.createdAt).toLocaleString()}</Typography>
+          </Grid>
+          <Grid item xs={12} sm={6} md={4}>
+            <Typography variant="body2" color="text.secondary">Zoom Integration:</Typography>
+            <Typography variant="body1">{stats.hasZoomCredentials ? '✅ Configured' : '❌ Not Configured'}</Typography>
+          </Grid>
+        </Grid>
+      </Paper>
 
-      {/* Statistics */}
-      <div className="details-section">
-        <h2>Statistics</h2>
-        <div className="stats-grid">
-          <div className="stat-card">
-            <div className="stat-icon">📅</div>
-            <div className="stat-content">
-              <h3>Total Meetings</h3>
-              <p className="stat-number">{stats.meetings}</p>
-              <p className="stat-detail">{stats.activeMeetings} active</p>
-            </div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-icon">👥</div>
-            <div className="stat-content">
-              <h3>Total Registrants</h3>
-              <p className="stat-number">{stats.totalRegistrants}</p>
-              <p className="stat-detail">Across all meetings</p>
-            </div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-icon">✅</div>
-            <div className="stat-content">
-              <h3>Zoom Synced</h3>
-              <p className="stat-number">{stats.syncedToZoom}</p>
-              <p className="stat-detail">{stats.syncRate}% sync rate</p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <Grid container spacing={3} sx={{ mb: 3 }}>
+        <Grid item xs={12} sm={6} md={4}>
+          <Card>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                <EventIcon sx={{ color: 'primary.main', mr: 1 }} />
+              </Box>
+              <Typography variant="h4" component="div" fontWeight="bold">
+                {stats.meetings}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Total Meetings
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                {stats.activeMeetings} active
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} sm={6} md={4}>
+          <Card>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                <PeopleIcon sx={{ color: 'success.main', mr: 1 }} />
+              </Box>
+              <Typography variant="h4" component="div" fontWeight="bold">
+                {stats.totalRegistrants}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Total Registrants
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Across all meetings
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} sm={6} md={4}>
+          <Card>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                <CheckCircleIcon sx={{ color: 'info.main', mr: 1 }} />
+              </Box>
+              <Typography variant="h4" component="div" fontWeight="bold">
+                {stats.syncedToZoom}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Zoom Synced
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                {stats.syncRate}% sync rate
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
 
-      {/* Recent Meetings */}
-      <div className="details-section">
-        <h2>Recent Meetings</h2>
+      <Paper sx={{ p: 3, mb: 3 }}>
+        <Typography variant="h6" component="h2" fontWeight="bold" gutterBottom>
+          Recent Meetings
+        </Typography>
         {recentMeetings.length > 0 ? (
-          <div className="table-container">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Meeting Name</th>
-                  <th>Type</th>
-                  <th>Start Time</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Meeting Name</TableCell>
+                  <TableCell>Type</TableCell>
+                  <TableCell>Start Time</TableCell>
+                  <TableCell>Status</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
                 {recentMeetings.map((meeting) => (
-                  <tr key={meeting._id}>
-                    <td>{meeting.meetingName}</td>
-                    <td>
-                      <span className="badge">
-                        {meeting.meetingType === 'webinar' ? '📹 Webinar' : '🎥 Meeting'}
-                      </span>
-                    </td>
-                    <td>{new Date(meeting.startTime).toLocaleString()}</td>
-                    <td>
-                      <span className={`status-badge ${meeting.isActive ? 'status-active' : 'status-inactive'}`}>
-                        {meeting.isActive ? 'Active' : 'Inactive'}
-                      </span>
-                    </td>
-                  </tr>
+                  <TableRow key={meeting._id}>
+                    <TableCell>{meeting.meetingName}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={meeting.meetingType === 'webinar' ? 'Webinar' : 'Meeting'}
+                        size="small"
+                        variant="outlined"
+                      />
+                    </TableCell>
+                    <TableCell>{new Date(meeting.startTime).toLocaleString()}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={meeting.isActive ? 'Active' : 'Inactive'}
+                        color={meeting.isActive ? 'success' : 'default'}
+                        size="small"
+                      />
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </TableBody>
+            </Table>
+          </TableContainer>
         ) : (
-          <p>No meetings yet</p>
+          <Typography variant="body2" color="text.secondary">No meetings yet</Typography>
         )}
-      </div>
+      </Paper>
 
-      {/* Recent Registrants */}
-      <div className="details-section">
-        <h2>Recent Registrants (Last 10)</h2>
+      <Paper sx={{ p: 3, mb: 3 }}>
+        <Typography variant="h6" component="h2" fontWeight="bold" gutterBottom>
+          Recent Registrants (Last 10)
+        </Typography>
         {recentRegistrants.length > 0 ? (
-          <div className="table-container">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Meeting</th>
-                  <th>Zoom Status</th>
-                  <th>Registered</th>
-                </tr>
-              </thead>
-              <tbody>
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Name</TableCell>
+                  <TableCell>Email</TableCell>
+                  <TableCell>Meeting</TableCell>
+                  <TableCell>Zoom Status</TableCell>
+                  <TableCell>Registered</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
                 {recentRegistrants.map((registrant) => (
-                  <tr key={registrant._id}>
-                    <td>{registrant.firstName} {registrant.lastName}</td>
-                    <td>{registrant.email}</td>
-                    <td>{registrant.meetingId?.meetingName || 'N/A'}</td>
-                    <td>
+                  <TableRow key={registrant._id}>
+                    <TableCell>{registrant.firstName} {registrant.lastName}</TableCell>
+                    <TableCell>{registrant.email}</TableCell>
+                    <TableCell>{registrant.meetingId?.meetingName || 'N/A'}</TableCell>
+                    <TableCell>
                       {registrant.syncedToZoom ? (
-                        <span className="status-badge status-active">Synced</span>
+                        <Chip label="Synced" color="success" size="small" />
                       ) : registrant.syncError ? (
-                        <span className="status-badge status-error" title={registrant.syncError}>
-                          Error
-                        </span>
+                        <Chip label="Error" color="error" size="small" title={registrant.syncError} />
                       ) : (
-                        <span className="status-badge status-pending">Pending</span>
+                        <Chip label="Pending" color="default" size="small" />
                       )}
-                    </td>
-                    <td>{new Date(registrant.registeredAt).toLocaleString()}</td>
-                  </tr>
+                    </TableCell>
+                    <TableCell>{new Date(registrant.registeredAt).toLocaleString()}</TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </TableBody>
+            </Table>
+          </TableContainer>
         ) : (
-          <p>No registrants yet</p>
+          <Typography variant="body2" color="text.secondary">No registrants yet</Typography>
         )}
-      </div>
+      </Paper>
 
-      {/* Registration Trend */}
       {registrationTrend.length > 0 && (
-        <div className="details-section">
-          <h2>Registration Trend (Last 30 Days)</h2>
-          <div className="trend-chart">
-            {registrationTrend.map((day) => (
-              <div key={day._id} className="trend-item">
-                <div className="trend-date">{new Date(day._id).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
-                <div className="trend-bar" style={{ width: `${(day.count / Math.max(...registrationTrend.map(d => d.count))) * 100}%` }}>
-                  {day.count}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <Paper sx={{ p: 3 }}>
+          <Typography variant="h6" component="h2" fontWeight="bold" gutterBottom>
+            Registration Trend (Last 30 Days)
+          </Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            {registrationTrend.map((day) => {
+              const maxCount = Math.max(...registrationTrend.map(d => d.count));
+              const width = (day.count / maxCount) * 100;
+              return (
+                <Box key={day._id} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Typography variant="body2" sx={{ minWidth: 80 }}>
+                    {new Date(day._id).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  </Typography>
+                  <Box sx={{ flex: 1, bgcolor: 'grey.200', borderRadius: 1, height: 24, position: 'relative' }}>
+                    <Box
+                      sx={{
+                        width: `${width}%`,
+                        height: '100%',
+                        bgcolor: 'primary.main',
+                        borderRadius: 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'flex-end',
+                        px: 1,
+                      }}
+                    >
+                      <Typography variant="body2" color="white" fontWeight="bold">
+                        {day.count}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Box>
+              );
+            })}
+          </Box>
+        </Paper>
       )}
-    </div>
+    </Container>
   );
 }
 

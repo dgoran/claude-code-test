@@ -1,7 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link as RouterLink } from 'react-router-dom';
+import {
+  Box,
+  Container,
+  Typography,
+  Button,
+  CircularProgress,
+  Paper,
+  Grid,
+  Chip,
+  AppBar,
+  Toolbar,
+} from '@mui/material';
+import {
+  EventAvailable as EventIcon,
+  Schedule as ScheduleIcon,
+  Public as PublicIcon,
+} from '@mui/icons-material';
 import { getPublicMeeting } from '../utils/api';
-import './LandingPage.css';
 
 const LandingPage = () => {
   const { subdomain, meetingId } = useParams();
@@ -28,66 +44,108 @@ const LandingPage = () => {
 
   if (loading) {
     return (
-      <div className="landing-container">
-        <div className="loading">Loading...</div>
-      </div>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <Box sx={{ textAlign: 'center' }}>
+          <CircularProgress />
+          <Typography sx={{ mt: 2 }}>Loading...</Typography>
+        </Box>
+      </Box>
     );
   }
 
   if (error || !meeting) {
     return (
-      <div className="landing-container">
-        <div className="error-page">
-          <h1>404</h1>
-          <p>{error || 'Meeting not found'}</p>
-        </div>
-      </div>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <Box sx={{ textAlign: 'center' }}>
+          <Typography variant="h1" component="h1" fontWeight="bold" sx={{ fontSize: '6rem' }}>
+            404
+          </Typography>
+          <Typography variant="h6" color="text.secondary">
+            {error || 'Meeting not found'}
+          </Typography>
+        </Box>
+      </Box>
     );
   }
 
   return (
-    <div className="landing-container">
-      <div className="landing-header">
-        <h1>{organization?.organizationName}</h1>
-      </div>
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+      <AppBar position="static" color="inherit" elevation={1}>
+        <Toolbar>
+          <Typography variant="h6" component="div" fontWeight="bold">
+            {organization?.organizationName}
+          </Typography>
+        </Toolbar>
+      </AppBar>
 
-      <div className="landing-content">
-        <div className="landing-hero">
-          <span className="event-type">
-            {meeting.meetingType === 'webinar' ? 'Webinar' : 'Meeting'}
-          </span>
-          <h2>{meeting.landingPageTitle || meeting.meetingName}</h2>
-          <p className="landing-description">
+      <Container maxWidth="md" sx={{ py: 8 }}>
+        <Paper sx={{ p: 4, textAlign: 'center' }}>
+          <Chip
+            label={meeting.meetingType === 'webinar' ? 'Webinar' : 'Meeting'}
+            color="primary"
+            sx={{ mb: 2 }}
+          />
+          <Typography variant="h3" component="h2" gutterBottom fontWeight="bold">
+            {meeting.landingPageTitle || meeting.meetingName}
+          </Typography>
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
             {meeting.landingPageDescription || meeting.description}
-          </p>
+          </Typography>
 
-          <div className="meeting-info">
-            <div className="info-box">
-              <strong>Date & Time</strong>
-              <p>{new Date(meeting.startTime).toLocaleString()}</p>
-            </div>
-            <div className="info-box">
-              <strong>Duration</strong>
-              <p>{meeting.duration} minutes</p>
-            </div>
-            <div className="info-box">
-              <strong>Timezone</strong>
-              <p>{meeting.timezone}</p>
-            </div>
-          </div>
+          <Grid container spacing={3} sx={{ mb: 4 }}>
+            <Grid item xs={12} md={4}>
+              <Box sx={{ textAlign: 'center' }}>
+                <EventIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
+                <Typography variant="subtitle2" fontWeight="bold">
+                  Date & Time
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {new Date(meeting.startTime).toLocaleString()}
+                </Typography>
+              </Box>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Box sx={{ textAlign: 'center' }}>
+                <ScheduleIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
+                <Typography variant="subtitle2" fontWeight="bold">
+                  Duration
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {meeting.duration} minutes
+                </Typography>
+              </Box>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Box sx={{ textAlign: 'center' }}>
+                <PublicIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
+                <Typography variant="subtitle2" fontWeight="bold">
+                  Timezone
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {meeting.timezone}
+                </Typography>
+              </Box>
+            </Grid>
+          </Grid>
 
-          <Link to={`/${subdomain}/${meetingId}/register`}>
-            <button className="btn btn-primary btn-large">
-              Register Now
-            </button>
-          </Link>
-        </div>
+          <Button
+            component={RouterLink}
+            to={`/${subdomain}/${meetingId}/register`}
+            variant="contained"
+            size="large"
+            sx={{ px: 6, py: 1.5 }}
+          >
+            Register Now
+          </Button>
+        </Paper>
 
-        <div className="landing-footer">
-          <p>Powered by Zoom Registration Platform</p>
-        </div>
-      </div>
-    </div>
+        <Box sx={{ textAlign: 'center', mt: 4 }}>
+          <Typography variant="body2" color="text.secondary">
+            Powered by Zoom Registration Platform
+          </Typography>
+        </Box>
+      </Container>
+    </Box>
   );
 };
 

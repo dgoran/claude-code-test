@@ -1,7 +1,22 @@
 import React, { useState, useEffect } from 'react';
+import {
+  Container,
+  Box,
+  Typography,
+  TextField,
+  Button,
+  CircularProgress,
+  Alert,
+  AlertTitle,
+  Paper,
+  Divider,
+  List,
+  ListItem,
+  ListItemText,
+  Link,
+} from '@mui/material';
 import { getProfile, updateZoomCredentials } from '../utils/api';
 import { setOrganization } from '../utils/auth';
-import './Settings.css';
 
 const Settings = () => {
   const [profile, setProfile] = useState(null);
@@ -53,12 +68,10 @@ const Settings = () => {
       const response = await updateZoomCredentials(zoomCredentials);
       setSuccess('Zoom credentials updated successfully!');
 
-      // Update local storage
       const updatedProfile = { ...profile, hasZoomCredentials: true };
       setProfile(updatedProfile);
       setOrganization(updatedProfile);
 
-      // Clear form
       setZoomCredentials({
         zoomAccountId: '',
         zoomClientId: '',
@@ -73,108 +86,144 @@ const Settings = () => {
 
   if (loading) {
     return (
-      <div className="container">
-        <div className="loading">Loading settings...</div>
-      </div>
+      <Container maxWidth="lg" sx={{ py: 4, textAlign: 'center' }}>
+        <CircularProgress />
+        <Typography sx={{ mt: 2 }}>Loading settings...</Typography>
+      </Container>
     );
   }
 
   return (
-    <div className="container">
-      <h1>Settings</h1>
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Typography variant="h4" component="h1" fontWeight="bold" gutterBottom>
+        Settings
+      </Typography>
 
-        <div className="card">
-          <h3>Organization Information</h3>
-          <div className="info-section">
-            <div className="info-item">
-              <strong>Organization Name:</strong>
-              <span>{profile?.organizationName}</span>
-            </div>
-            <div className="info-item">
-              <strong>Email:</strong>
-              <span>{profile?.email}</span>
-            </div>
-            <div className="info-item">
-              <strong>Subdomain:</strong>
-              <span>{profile?.subdomain}</span>
-            </div>
-            <div className="info-item">
-              <strong>Member Since:</strong>
-              <span>{new Date(profile?.createdAt).toLocaleDateString()}</span>
-            </div>
-          </div>
-        </div>
+      <Paper sx={{ p: 3, mb: 3 }}>
+        <Typography variant="h6" component="h3" gutterBottom fontWeight="bold">
+          Organization Information
+        </Typography>
+        <List>
+          <ListItem>
+            <ListItemText
+              primary="Organization Name"
+              secondary={profile?.organizationName}
+            />
+          </ListItem>
+          <Divider />
+          <ListItem>
+            <ListItemText
+              primary="Email"
+              secondary={profile?.email}
+            />
+          </ListItem>
+          <Divider />
+          <ListItem>
+            <ListItemText
+              primary="Subdomain"
+              secondary={profile?.subdomain}
+            />
+          </ListItem>
+          <Divider />
+          <ListItem>
+            <ListItemText
+              primary="Member Since"
+              secondary={new Date(profile?.createdAt).toLocaleDateString()}
+            />
+          </ListItem>
+        </List>
+      </Paper>
 
-        <div className="card">
-          <h3>Zoom API Credentials</h3>
-          <p className="settings-description">
-            Configure your Zoom API credentials to automatically sync registrants to your Zoom meetings and webinars.
-            These credentials are stored securely and are only used for API integration.
-          </p>
+      <Paper sx={{ p: 3 }}>
+        <Typography variant="h6" component="h3" gutterBottom fontWeight="bold">
+          Zoom API Credentials
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          Configure your Zoom API credentials to automatically sync registrants to your Zoom meetings and webinars.
+          These credentials are stored securely and are only used for API integration.
+        </Typography>
 
-          {profile?.hasZoomCredentials && (
-            <div className="alert alert-success">
-              Zoom credentials are configured. You can update them below.
-            </div>
-          )}
+        {profile?.hasZoomCredentials && (
+          <Alert severity="success" sx={{ mb: 2 }}>
+            Zoom credentials are configured. You can update them below.
+          </Alert>
+        )}
 
-          {error && <div className="alert alert-error">{error}</div>}
-          {success && <div className="alert alert-success">{success}</div>}
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
 
-          <div className="alert alert-info">
-            <strong>How to get your Zoom credentials:</strong>
-            <ol>
-              <li>Go to <a href="https://marketplace.zoom.us/" target="_blank" rel="noopener noreferrer">Zoom Marketplace</a></li>
-              <li>Click "Develop" → "Build App"</li>
-              <li>Create a "Server-to-Server OAuth" app</li>
-              <li>Copy your Account ID, Client ID, and Client Secret</li>
-              <li>Add required scopes: meeting:write, meeting:read, webinar:write, webinar:read</li>
-            </ol>
-          </div>
+        {success && (
+          <Alert severity="success" sx={{ mb: 2 }}>
+            {success}
+          </Alert>
+        )}
 
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label>Zoom Account ID *</label>
-              <input
-                type="text"
-                name="zoomAccountId"
-                value={zoomCredentials.zoomAccountId}
-                onChange={handleChange}
-                placeholder="Enter your Zoom Account ID"
-                required
-              />
-            </div>
+        <Alert severity="info" sx={{ mb: 3 }}>
+          <AlertTitle>How to get your Zoom credentials:</AlertTitle>
+          <ol style={{ margin: 0, paddingLeft: 20 }}>
+            <li>
+              Go to{' '}
+              <Link href="https://marketplace.zoom.us/" target="_blank" rel="noopener noreferrer">
+                Zoom Marketplace
+              </Link>
+            </li>
+            <li>Click "Develop" → "Build App"</li>
+            <li>Create a "Server-to-Server OAuth" app</li>
+            <li>Copy your Account ID, Client ID, and Client Secret</li>
+            <li>Add required scopes: meeting:write, meeting:read, webinar:write, webinar:read</li>
+          </ol>
+        </Alert>
 
-            <div className="form-group">
-              <label>Zoom Client ID *</label>
-              <input
-                type="text"
-                name="zoomClientId"
-                value={zoomCredentials.zoomClientId}
-                onChange={handleChange}
-                placeholder="Enter your Zoom Client ID"
-                required
-              />
-            </div>
+        <Box component="form" onSubmit={handleSubmit}>
+          <TextField
+            fullWidth
+            label="Zoom Account ID"
+            name="zoomAccountId"
+            value={zoomCredentials.zoomAccountId}
+            onChange={handleChange}
+            placeholder="Enter your Zoom Account ID"
+            required
+            margin="normal"
+          />
 
-            <div className="form-group">
-              <label>Zoom Client Secret *</label>
-              <input
-                type="password"
-                name="zoomClientSecret"
-                value={zoomCredentials.zoomClientSecret}
-                onChange={handleChange}
-                placeholder="Enter your Zoom Client Secret"
-                required
-              />
-            </div>
+          <TextField
+            fullWidth
+            label="Zoom Client ID"
+            name="zoomClientId"
+            value={zoomCredentials.zoomClientId}
+            onChange={handleChange}
+            placeholder="Enter your Zoom Client ID"
+            required
+            margin="normal"
+          />
 
-            <button type="submit" className="btn btn-primary" disabled={saving}>
-              {saving ? 'Saving...' : 'Update Credentials'}
-            </button>
-          </form>
-        </div>
-    </div>
+          <TextField
+            fullWidth
+            label="Zoom Client Secret"
+            name="zoomClientSecret"
+            type="password"
+            value={zoomCredentials.zoomClientSecret}
+            onChange={handleChange}
+            placeholder="Enter your Zoom Client Secret"
+            required
+            margin="normal"
+          />
+
+          <Button
+            type="submit"
+            variant="contained"
+            size="large"
+            disabled={saving}
+            sx={{ mt: 2 }}
+          >
+            {saving ? 'Saving...' : 'Update Credentials'}
+          </Button>
+        </Box>
+      </Paper>
+    </Container>
   );
 };
 

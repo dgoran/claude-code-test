@@ -1,8 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  Container,
+  Box,
+  Typography,
+  Button,
+  TextField,
+  Paper,
+  CircularProgress,
+  Alert,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Chip,
+  Link,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+} from '@mui/material';
+import {
+  Dashboard as DashboardIcon,
+  Search as SearchIcon,
+} from '@mui/icons-material';
 import axios from 'axios';
 import { getOwnerToken } from '../utils/ownerAuth';
-import './Meetings.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
@@ -12,6 +38,7 @@ function OwnerAllMeetings() {
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [pagination, setPagination] = useState({ page: 1, limit: 50, total: 0, pages: 0 });
+  const [deleteDialog, setDeleteDialog] = useState({ open: false, meetingId: null, meetingName: '' });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -45,16 +72,14 @@ function OwnerAllMeetings() {
     setPagination({ ...pagination, page: 1 });
   };
 
-  const handleDelete = async (meetingId, meetingName) => {
-    if (!window.confirm(
-      `Are you sure you want to DELETE "${meetingName}"?\n\nThis will permanently delete:\n- The meeting\n- All registrants for this meeting\n\nThis action CANNOT be undone!`
-    )) {
-      return;
-    }
+  const handleDeleteClick = (meetingId, meetingName) => {
+    setDeleteDialog({ open: true, meetingId, meetingName });
+  };
 
+  const handleDeleteConfirm = async () => {
     try {
       const token = getOwnerToken();
-      await axios.delete(`${API_URL}/admin/meetings/${meetingId}`, {
+      await axios.delete(`${API_URL}/admin/meetings/${deleteDialog.meetingId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       alert('Meeting deleted successfully');
@@ -62,126 +87,169 @@ function OwnerAllMeetings() {
     } catch (err) {
       console.error('Error deleting meeting:', err);
       alert('Failed to delete meeting');
+    } finally {
+      setDeleteDialog({ open: false, meetingId: null, meetingName: '' });
     }
   };
 
   return (
-    <div className="meetings-container">
-      <div className="page-header">
-        <h1>All Meetings</h1>
-        <button className="btn-primary" onClick={() => navigate('/owner/dashboard')}>
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h4" component="h1" fontWeight="bold">
+          All Meetings
+        </Typography>
+        <Button
+          variant="contained"
+          startIcon={<DashboardIcon />}
+          onClick={() => navigate('/owner/dashboard')}
+        >
           Back to Dashboard
-        </button>
-      </div>
+        </Button>
+      </Box>
 
-      {/* Search */}
-      <div className="filters-section">
-        <div className="search-bar">
-          <input
-            type="text"
-            placeholder="Search meetings..."
-            value={searchTerm}
-            onChange={handleSearch}
-          />
-        </div>
-      </div>
+      <Paper sx={{ p: 2, mb: 3 }}>
+        <TextField
+          placeholder="Search meetings..."
+          value={searchTerm}
+          onChange={handleSearch}
+          size="small"
+          fullWidth
+          InputProps={{
+            startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />,
+          }}
+        />
+      </Paper>
 
-      {error && <div className="error-message">{error}</div>}
+      {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
 
       {loading ? (
-        <p>Loading meetings...</p>
+        <Box sx={{ textAlign: 'center', py: 4 }}>
+          <CircularProgress />
+          <Typography sx={{ mt: 2 }}>Loading meetings...</Typography>
+        </Box>
       ) : (
         <>
-          <div className="table-container">
-            <table className="meetings-table">
-              <thead>
-                <tr>
-                  <th>Meeting Name</th>
-                  <th>Organization</th>
-                  <th>Type</th>
-                  <th>Start Time</th>
-                  <th>Registrants</th>
-                  <th>Status</th>
-                  <th>Created</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Meeting Name</TableCell>
+                  <TableCell>Organization</TableCell>
+                  <TableCell>Type</TableCell>
+                  <TableCell>Start Time</TableCell>
+                  <TableCell align="center">Registrants</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell>Created</TableCell>
+                  <TableCell align="right">Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
                 {meetings.length > 0 ? (
                   meetings.map((meeting) => (
-                    <tr key={meeting._id}>
-                      <td>
-                        <strong>{meeting.meetingName}</strong>
-                      </td>
-                      <td>
-                        <a
-                          href="#"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            navigate(`/owner/organizations/${meeting.organizationId._id}`);
-                          }}
+                    <TableRow key={meeting._id}>
+                      <TableCell>
+                        <Typography fontWeight="bold">{meeting.meetingName}</Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Link
+                          component="button"
+                          variant="body2"
+                          onClick={() => navigate(`/owner/organizations/${meeting.organizationId._id}`)}
+                          sx={{ textAlign: 'left' }}
                         >
                           {meeting.organizationId.organizationName}
-                        </a>
-                      </td>
-                      <td>
-                        <span className="badge">
-                          {meeting.meetingType === 'webinar' ? '📹 Webinar' : '🎥 Meeting'}
-                        </span>
-                      </td>
-                      <td>{new Date(meeting.startTime).toLocaleString()}</td>
-                      <td>{meeting.registrantCount || 0}</td>
-                      <td>
-                        <span className={`status-badge ${meeting.isActive ? 'status-active' : 'status-inactive'}`}>
-                          {meeting.isActive ? 'Active' : 'Inactive'}
-                        </span>
-                      </td>
-                      <td>{new Date(meeting.createdAt).toLocaleDateString()}</td>
-                      <td>
-                        <button
-                          className="btn-small btn-danger"
-                          onClick={() => handleDelete(meeting._id, meeting.meetingName)}
-                          title="Delete Meeting"
+                        </Link>
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={meeting.meetingType === 'webinar' ? 'Webinar' : 'Meeting'}
+                          size="small"
+                          variant="outlined"
+                        />
+                      </TableCell>
+                      <TableCell>{new Date(meeting.startTime).toLocaleString()}</TableCell>
+                      <TableCell align="center">{meeting.registrantCount || 0}</TableCell>
+                      <TableCell>
+                        <Chip
+                          label={meeting.isActive ? 'Active' : 'Inactive'}
+                          color={meeting.isActive ? 'success' : 'default'}
+                          size="small"
+                        />
+                      </TableCell>
+                      <TableCell>{new Date(meeting.createdAt).toLocaleDateString()}</TableCell>
+                      <TableCell align="right">
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          color="error"
+                          onClick={() => handleDeleteClick(meeting._id, meeting.meetingName)}
                         >
                           Delete
-                        </button>
-                      </td>
-                    </tr>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
                   ))
                 ) : (
-                  <tr>
-                    <td colSpan="8" style={{ textAlign: 'center' }}>
-                      No meetings found
-                    </td>
-                  </tr>
+                  <TableRow>
+                    <TableCell colSpan={8} align="center">
+                      <Typography variant="body2" color="text.secondary">
+                        No meetings found
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
                 )}
-              </tbody>
-            </table>
-          </div>
+              </TableBody>
+            </Table>
+          </TableContainer>
 
-          {/* Pagination */}
           {pagination.pages > 1 && (
-            <div className="pagination">
-              <button
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2, mt: 3 }}>
+              <Button
                 onClick={() => setPagination({ ...pagination, page: pagination.page - 1 })}
                 disabled={pagination.page === 1}
               >
                 Previous
-              </button>
-              <span>
+              </Button>
+              <Typography>
                 Page {pagination.page} of {pagination.pages} ({pagination.total} total)
-              </span>
-              <button
+              </Typography>
+              <Button
                 onClick={() => setPagination({ ...pagination, page: pagination.page + 1 })}
                 disabled={pagination.page === pagination.pages}
               >
                 Next
-              </button>
-            </div>
+              </Button>
+            </Box>
           )}
         </>
       )}
-    </div>
+
+      <Dialog
+        open={deleteDialog.open}
+        onClose={() => setDeleteDialog({ open: false, meetingId: null, meetingName: '' })}
+      >
+        <DialogTitle>Delete Meeting</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to DELETE "{deleteDialog.meetingName}"?
+            <br /><br />
+            This will permanently delete:
+            <br />- The meeting
+            <br />- All registrants for this meeting
+            <br /><br />
+            <strong>This action CANNOT be undone!</strong>
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialog({ open: false, meetingId: null, meetingName: '' })}>
+            Cancel
+          </Button>
+          <Button onClick={handleDeleteConfirm} color="error" variant="contained">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Container>
   );
 }
 

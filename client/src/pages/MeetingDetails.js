@@ -1,8 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import {
+  Container,
+  Box,
+  Typography,
+  Button,
+  Paper,
+  CircularProgress,
+  Alert,
+  TextField,
+  Chip,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Snackbar,
+} from '@mui/material';
+import {
+  ArrowBack as ArrowBackIcon,
+  Edit as EditIcon,
+  ContentCopy as ContentCopyIcon,
+  FileDownload as FileDownloadIcon,
+  CloudSync as CloudSyncIcon,
+  Delete as DeleteIcon,
+} from '@mui/icons-material';
 import { getMeeting, getMeetingRegistrants, syncRegistrant, deleteRegistrant } from '../utils/api';
 import { getOrganization } from '../utils/auth';
-import './MeetingDetails.css';
 
 const MeetingDetails = () => {
   const { id } = useParams();
@@ -11,6 +41,8 @@ const MeetingDetails = () => {
   const [meeting, setMeeting] = useState(null);
   const [registrants, setRegistrants] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deleteDialog, setDeleteDialog] = useState({ open: false, registrantId: null });
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
   useEffect(() => {
     loadMeetingData();
@@ -27,7 +59,7 @@ const MeetingDetails = () => {
       setRegistrants(registrantsRes.data.registrants);
     } catch (error) {
       console.error('Error loading meeting data:', error);
-      alert('Failed to load meeting data');
+      setSnackbar({ open: true, message: 'Failed to load meeting data', severity: 'error' });
     } finally {
       setLoading(false);
     }
@@ -37,20 +69,25 @@ const MeetingDetails = () => {
     try {
       await syncRegistrant(registrantId);
       loadMeetingData();
-      alert('Registrant synced successfully!');
+      setSnackbar({ open: true, message: 'Registrant synced successfully!', severity: 'success' });
     } catch (error) {
-      alert('Failed to sync registrant');
+      setSnackbar({ open: true, message: 'Failed to sync registrant', severity: 'error' });
     }
   };
 
-  const handleDelete = async (registrantId) => {
-    if (window.confirm('Are you sure you want to delete this registrant?')) {
-      try {
-        await deleteRegistrant(registrantId);
-        setRegistrants(registrants.filter(r => r._id !== registrantId));
-      } catch (error) {
-        alert('Failed to delete registrant');
-      }
+  const handleDeleteClick = (registrantId) => {
+    setDeleteDialog({ open: true, registrantId });
+  };
+
+  const handleDeleteConfirm = async () => {
+    try {
+      await deleteRegistrant(deleteDialog.registrantId);
+      setRegistrants(registrants.filter(r => r._id !== deleteDialog.registrantId));
+      setSnackbar({ open: true, message: 'Registrant deleted successfully', severity: 'success' });
+    } catch (error) {
+      setSnackbar({ open: true, message: 'Failed to delete registrant', severity: 'error' });
+    } finally {
+      setDeleteDialog({ open: false, registrantId: null });
     }
   };
 
@@ -59,7 +96,7 @@ const MeetingDetails = () => {
     try {
       if (navigator.clipboard && navigator.clipboard.writeText) {
         await navigator.clipboard.writeText(link);
-        alert('Registration link copied to clipboard!');
+        setSnackbar({ open: true, message: 'Registration link copied to clipboard!', severity: 'success' });
       } else {
         // Fallback for browsers that don't support clipboard API
         const textArea = document.createElement('textarea');
@@ -70,15 +107,15 @@ const MeetingDetails = () => {
         textArea.select();
         try {
           document.execCommand('copy');
-          alert('Registration link copied to clipboard!');
+          setSnackbar({ open: true, message: 'Registration link copied to clipboard!', severity: 'success' });
         } catch (err) {
-          alert('Failed to copy link. Please copy manually.');
+          setSnackbar({ open: true, message: 'Failed to copy link', severity: 'error' });
         }
         document.body.removeChild(textArea);
       }
     } catch (error) {
       console.error('Failed to copy to clipboard:', error);
-      alert('Failed to copy link. Please copy manually.');
+      setSnackbar({ open: true, message: 'Failed to copy link', severity: 'error' });
     }
   };
 
@@ -106,138 +143,216 @@ const MeetingDetails = () => {
 
   if (loading) {
     return (
-      <div className="container">
-        <div className="loading">Loading meeting details...</div>
-      </div>
+      <Container maxWidth="lg" sx={{ py: 4, textAlign: 'center' }}>
+        <CircularProgress />
+        <Typography sx={{ mt: 2 }}>Loading meeting details...</Typography>
+      </Container>
     );
   }
 
   if (!meeting) {
     return (
-      <div className="container">
-        <div className="alert alert-error">Meeting not found</div>
-      </div>
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Alert severity="error">Meeting not found</Alert>
+      </Container>
     );
   }
 
   return (
-    <div className="container">
-      <button onClick={() => navigate('/meetings')} className="btn btn-secondary">
-        ← Back to Meetings
-      </button>
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Button
+        startIcon={<ArrowBackIcon />}
+        onClick={() => navigate('/meetings')}
+        sx={{ mb: 3 }}
+      >
+        Back to Meetings
+      </Button>
 
-        <div className="meeting-header">
-          <div>
-            <h1>{meeting.meetingName}</h1>
-            <p className="meeting-meta">
-              {meeting.meetingType === 'webinar' ? 'Webinar' : 'Meeting'} •
-              {new Date(meeting.startTime).toLocaleString()} •
-              {meeting.duration} minutes
-            </p>
-          </div>
-          <button onClick={() => navigate(`/meetings/${id}/edit`)} className="btn btn-primary">
-            Edit Meeting
-          </button>
-        </div>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Box>
+          <Typography variant="h4" component="h1" fontWeight="bold">
+            {meeting.meetingName}
+          </Typography>
+          <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
+            {meeting.meetingType === 'webinar' ? 'Webinar' : 'Meeting'} •{' '}
+            {new Date(meeting.startTime).toLocaleString()} •{' '}
+            {meeting.duration} minutes
+          </Typography>
+        </Box>
+        <Button
+          variant="contained"
+          startIcon={<EditIcon />}
+          onClick={() => navigate(`/meetings/${id}/edit`)}
+        >
+          Edit Meeting
+        </Button>
+      </Box>
 
-        <div className="card">
-          <h3>Meeting Information</h3>
-          {meeting.description && (
-            <div className="info-row">
-              <strong>Description:</strong>
-              <p>{meeting.description}</p>
-            </div>
+      <Paper sx={{ p: 3, mb: 3 }}>
+        <Typography variant="h6" component="h3" fontWeight="bold" gutterBottom>
+          Meeting Information
+        </Typography>
+        {meeting.description && (
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="body2" color="text.secondary" fontWeight="bold">
+              Description:
+            </Typography>
+            <Typography variant="body1">{meeting.description}</Typography>
+          </Box>
+        )}
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="body2" color="text.secondary" fontWeight="bold">
+            Timezone:
+          </Typography>
+          <Typography variant="body1">{meeting.timezone}</Typography>
+        </Box>
+        {meeting.zoomMeetingId && (
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="body2" color="text.secondary" fontWeight="bold">
+              Zoom Meeting ID:
+            </Typography>
+            <Typography variant="body1">{meeting.zoomMeetingId}</Typography>
+          </Box>
+        )}
+        <Box>
+          <Typography variant="body2" color="text.secondary" fontWeight="bold" sx={{ mb: 1 }}>
+            Registration Link:
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <TextField
+              value={`${window.location.origin}/${organization.subdomain}/${meeting._id}`}
+              fullWidth
+              InputProps={{ readOnly: true }}
+              size="small"
+            />
+            <Button
+              variant="contained"
+              startIcon={<ContentCopyIcon />}
+              onClick={copyLink}
+            >
+              Copy Link
+            </Button>
+          </Box>
+        </Box>
+      </Paper>
+
+      <Paper sx={{ p: 3 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+          <Typography variant="h6" component="h3" fontWeight="bold">
+            Registrants ({registrants.length})
+          </Typography>
+          {registrants.length > 0 && (
+            <Button
+              variant="contained"
+              color="success"
+              startIcon={<FileDownloadIcon />}
+              onClick={exportCSV}
+            >
+              Export CSV
+            </Button>
           )}
-          <div className="info-row">
-            <strong>Timezone:</strong>
-            <span>{meeting.timezone}</span>
-          </div>
-          {meeting.zoomMeetingId && (
-            <div className="info-row">
-              <strong>Zoom Meeting ID:</strong>
-              <span>{meeting.zoomMeetingId}</span>
-            </div>
-          )}
-          <div className="info-row">
-            <strong>Registration Link:</strong>
-            <div className="link-container">
-              <input
-                type="text"
-                value={`${window.location.origin}/${organization.subdomain}/${meeting._id}`}
-                readOnly
-              />
-              <button onClick={copyLink} className="btn btn-primary">Copy Link</button>
-            </div>
-          </div>
-        </div>
+        </Box>
 
-        <div className="card">
-          <div className="registrants-header">
-            <h3>Registrants ({registrants.length})</h3>
-            {registrants.length > 0 && (
-              <button onClick={exportCSV} className="btn btn-success">
-                Export CSV
-              </button>
-            )}
-          </div>
-
-          {registrants.length > 0 ? (
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Phone</th>
-                  <th>Company</th>
-                  <th>Registered</th>
-                  <th>Zoom Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
+        {registrants.length > 0 ? (
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Name</TableCell>
+                  <TableCell>Email</TableCell>
+                  <TableCell>Phone</TableCell>
+                  <TableCell>Company</TableCell>
+                  <TableCell>Registered</TableCell>
+                  <TableCell>Zoom Status</TableCell>
+                  <TableCell align="right">Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
                 {registrants.map((registrant) => (
-                  <tr key={registrant._id}>
-                    <td>{registrant.firstName} {registrant.lastName}</td>
-                    <td>{registrant.email}</td>
-                    <td>{registrant.phone || '-'}</td>
-                    <td>{registrant.company || '-'}</td>
-                    <td>{new Date(registrant.registeredAt).toLocaleDateString()}</td>
-                    <td>
+                  <TableRow key={registrant._id}>
+                    <TableCell>{registrant.firstName} {registrant.lastName}</TableCell>
+                    <TableCell>{registrant.email}</TableCell>
+                    <TableCell>{registrant.phone || '-'}</TableCell>
+                    <TableCell>{registrant.company || '-'}</TableCell>
+                    <TableCell>{new Date(registrant.registeredAt).toLocaleDateString()}</TableCell>
+                    <TableCell>
                       {registrant.syncedToZoom ? (
-                        <span className="badge badge-success">Synced</span>
+                        <Chip label="Synced" color="success" size="small" />
                       ) : (
-                        <span className="badge badge-secondary">Not Synced</span>
+                        <Chip label="Not Synced" color="default" size="small" />
                       )}
-                    </td>
-                    <td>
-                      <div className="action-buttons">
+                    </TableCell>
+                    <TableCell align="right">
+                      <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
                         {!registrant.syncedToZoom && meeting.zoomMeetingId && (
-                          <button
+                          <Button
+                            size="small"
+                            variant="contained"
+                            startIcon={<CloudSyncIcon />}
                             onClick={() => handleSync(registrant._id)}
-                            className="btn btn-primary btn-sm"
                           >
                             Sync
-                          </button>
+                          </Button>
                         )}
-                        <button
-                          onClick={() => handleDelete(registrant._id)}
-                          className="btn btn-danger btn-sm"
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          color="error"
+                          startIcon={<DeleteIcon />}
+                          onClick={() => handleDeleteClick(registrant._id)}
                         >
                           Delete
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
+                        </Button>
+                      </Box>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-          ) : (
-            <div className="empty-state">
-              <p>No registrants yet. Share your registration link to get started!</p>
-            </div>
-          )}
-        </div>
-    </div>
+              </TableBody>
+            </Table>
+          </TableContainer>
+        ) : (
+          <Box sx={{ textAlign: 'center', py: 4 }}>
+            <Typography variant="body1" color="text.secondary">
+              No registrants yet. Share your registration link to get started!
+            </Typography>
+          </Box>
+        )}
+      </Paper>
+
+      <Dialog
+        open={deleteDialog.open}
+        onClose={() => setDeleteDialog({ open: false, registrantId: null })}
+      >
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete this registrant? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialog({ open: false, registrantId: null })}>
+            Cancel
+          </Button>
+          <Button onClick={handleDeleteConfirm} color="error" variant="contained">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+      >
+        <Alert
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          severity={snackbar.severity}
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+    </Container>
   );
 };
 

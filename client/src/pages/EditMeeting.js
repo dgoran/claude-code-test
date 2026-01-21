@@ -1,9 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import {
+  Container,
+  Box,
+  Typography,
+  Button,
+  TextField,
+  MenuItem,
+  Paper,
+  Alert,
+  FormControlLabel,
+  Checkbox,
+  CircularProgress,
+} from '@mui/material';
+import { ArrowBack as ArrowBackIcon } from '@mui/icons-material';
 import FormBuilder from '../components/FormBuilder';
 import { getMeeting, updateMeeting } from '../utils/api';
 import { getOrganization } from '../utils/auth';
-import './CreateMeeting.css';
 
 const EditMeeting = () => {
   const navigate = useNavigate();
@@ -102,159 +115,182 @@ const EditMeeting = () => {
 
   if (fetchingMeeting) {
     return (
-      <div className="container">
-        <div className="card">
-          <p>Loading meeting details...</p>
-        </div>
-      </div>
+      <Container maxWidth="lg" sx={{ py: 4, textAlign: 'center' }}>
+        <CircularProgress />
+        <Typography sx={{ mt: 2 }}>Loading meeting details...</Typography>
+      </Container>
     );
   }
 
   return (
-    <div className="container">
-      <h1>Edit Meeting/Webinar</h1>
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Box sx={{ mb: 3 }}>
+        <Button
+          startIcon={<ArrowBackIcon />}
+          onClick={() => navigate(`/meetings/${id}`)}
+          sx={{ mb: 2 }}
+        >
+          Back to Meeting Details
+        </Button>
+        <Typography variant="h4" component="h1" fontWeight="bold">
+          Edit Meeting/Webinar
+        </Typography>
+      </Box>
 
-        {error && <div className="alert alert-error">{error}</div>}
+      {error && (
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {error}
+        </Alert>
+      )}
 
-        <div className="card">
-          <form onSubmit={handleSubmit}>
-            <div className="form-row">
-              <div className="form-group">
-                <label>Meeting Name *</label>
-                <input
-                  type="text"
-                  name="meetingName"
-                  value={formData.meetingName}
-                  onChange={handleChange}
-                  placeholder="Enter meeting name"
-                  required
-                />
-              </div>
+      <Paper sx={{ p: 3 }}>
+        <Box component="form" onSubmit={handleSubmit}>
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2, mb: 3 }}>
+            <TextField
+              label="Meeting Name"
+              name="meetingName"
+              value={formData.meetingName}
+              onChange={handleChange}
+              required
+              fullWidth
+              placeholder="Enter meeting name"
+            />
 
-              <div className="form-group">
-                <label>Type *</label>
-                <select
-                  name="meetingType"
-                  value={formData.meetingType}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="meeting">Meeting</option>
-                  <option value="webinar">Webinar</option>
-                </select>
-              </div>
-            </div>
+            <TextField
+              select
+              label="Type"
+              name="meetingType"
+              value={formData.meetingType}
+              onChange={handleChange}
+              required
+              fullWidth
+            >
+              <MenuItem value="meeting">Meeting</MenuItem>
+              <MenuItem value="webinar">Webinar</MenuItem>
+            </TextField>
+          </Box>
 
-            <div className="form-group">
-              <label>Description</label>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                placeholder="Enter meeting description"
-                rows="4"
-              />
-            </div>
+          <TextField
+            label="Description"
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            multiline
+            rows={4}
+            fullWidth
+            placeholder="Enter meeting description"
+            sx={{ mb: 3 }}
+          />
 
-            <div className="form-row">
-              <div className="form-group">
-                <label>Start Time *</label>
-                <input
-                  type="datetime-local"
-                  name="startTime"
-                  value={formData.startTime}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr 1fr' }, gap: 2, mb: 3 }}>
+            <TextField
+              label="Start Time"
+              name="startTime"
+              type="datetime-local"
+              value={formData.startTime}
+              onChange={handleChange}
+              required
+              fullWidth
+              InputLabelProps={{ shrink: true }}
+            />
 
-              <div className="form-group">
-                <label>Duration (minutes) *</label>
-                <input
-                  type="number"
-                  name="duration"
-                  value={formData.duration}
-                  onChange={handleChange}
-                  min="15"
-                  max="1440"
-                  required
-                />
-              </div>
+            <TextField
+              label="Duration (minutes)"
+              name="duration"
+              type="number"
+              value={formData.duration}
+              onChange={handleChange}
+              required
+              fullWidth
+              inputProps={{ min: 15, max: 1440 }}
+            />
 
-              <div className="form-group">
-                <label>Timezone *</label>
-                <select
-                  name="timezone"
-                  value={formData.timezone}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="UTC">UTC</option>
-                  <option value="America/New_York">Eastern Time</option>
-                  <option value="America/Chicago">Central Time</option>
-                  <option value="America/Denver">Mountain Time</option>
-                  <option value="America/Los_Angeles">Pacific Time</option>
-                  <option value="Europe/London">London</option>
-                  <option value="Europe/Paris">Paris</option>
-                  <option value="Asia/Tokyo">Tokyo</option>
-                </select>
-              </div>
-            </div>
+            <TextField
+              select
+              label="Timezone"
+              name="timezone"
+              value={formData.timezone}
+              onChange={handleChange}
+              required
+              fullWidth
+            >
+              <MenuItem value="UTC">UTC</MenuItem>
+              <MenuItem value="America/New_York">Eastern Time</MenuItem>
+              <MenuItem value="America/Chicago">Central Time</MenuItem>
+              <MenuItem value="America/Denver">Mountain Time</MenuItem>
+              <MenuItem value="America/Los_Angeles">Pacific Time</MenuItem>
+              <MenuItem value="Europe/London">London</MenuItem>
+              <MenuItem value="Europe/Paris">Paris</MenuItem>
+              <MenuItem value="Asia/Tokyo">Tokyo</MenuItem>
+            </TextField>
+          </Box>
 
-            <h3>Landing Page Customization</h3>
+          <Typography variant="h6" component="h3" fontWeight="bold" sx={{ mb: 2 }}>
+            Landing Page Customization
+          </Typography>
 
-            <div className="form-group">
-              <label>Landing Page Title</label>
-              <input
-                type="text"
-                name="landingPageTitle"
-                value={formData.landingPageTitle}
-                onChange={handleChange}
-                placeholder="Leave blank to use meeting name"
-              />
-            </div>
+          <TextField
+            label="Landing Page Title"
+            name="landingPageTitle"
+            value={formData.landingPageTitle}
+            onChange={handleChange}
+            fullWidth
+            placeholder="Leave blank to use meeting name"
+            sx={{ mb: 2 }}
+          />
 
-            <div className="form-group">
-              <label>Landing Page Description</label>
-              <textarea
-                name="landingPageDescription"
-                value={formData.landingPageDescription}
-                onChange={handleChange}
-                placeholder="Custom description for the landing page"
-                rows="3"
-              />
-            </div>
+          <TextField
+            label="Landing Page Description"
+            name="landingPageDescription"
+            value={formData.landingPageDescription}
+            onChange={handleChange}
+            multiline
+            rows={3}
+            fullWidth
+            placeholder="Custom description for the landing page"
+            sx={{ mb: 2 }}
+          />
 
-            <div className="form-group">
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
+          <Box sx={{ mb: 3 }}>
+            <FormControlLabel
+              control={
+                <Checkbox
                   name="isActive"
                   checked={formData.isActive}
                   onChange={handleChange}
                 />
-                <span>Meeting is active</span>
-              </label>
-            </div>
+              }
+              label="Meeting is active"
+            />
+          </Box>
 
-            <h3>Registration Form Configuration</h3>
+          <Typography variant="h6" component="h3" fontWeight="bold" sx={{ mb: 2 }}>
+            Registration Form Configuration
+          </Typography>
+          <Box sx={{ mb: 3 }}>
             <FormBuilder formFields={formFields} onChange={setFormFields} />
+          </Box>
 
-            <div className="form-actions">
-              <button
-                type="button"
-                onClick={() => navigate(`/meetings/${id}`)}
-                className="btn btn-secondary"
-              >
-                Cancel
-              </button>
-              <button type="submit" className="btn btn-primary" disabled={loading}>
-                {loading ? 'Updating...' : 'Update Meeting'}
-              </button>
-            </div>
-          </form>
-        </div>
-    </div>
+          <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+            <Button
+              variant="outlined"
+              onClick={() => navigate(`/meetings/${id}`)}
+              disabled={loading}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={loading}
+              startIcon={loading && <CircularProgress size={20} />}
+            >
+              {loading ? 'Updating...' : 'Update Meeting'}
+            </Button>
+          </Box>
+        </Box>
+      </Paper>
+    </Container>
   );
 };
 

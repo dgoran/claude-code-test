@@ -1,8 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  Container,
+  Box,
+  Typography,
+  Button,
+  TextField,
+  Paper,
+  CircularProgress,
+  Alert,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Chip,
+  Link,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+} from '@mui/material';
+import {
+  Dashboard as DashboardIcon,
+  Search as SearchIcon,
+} from '@mui/icons-material';
 import axios from 'axios';
 import { getOwnerToken } from '../utils/ownerAuth';
-import './Meetings.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
@@ -12,6 +38,7 @@ function OwnerAllRegistrants() {
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [pagination, setPagination] = useState({ page: 1, limit: 50, total: 0, pages: 0 });
+  const [deleteDialog, setDeleteDialog] = useState({ open: false, registrantId: null, registrantName: '' });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -45,16 +72,14 @@ function OwnerAllRegistrants() {
     setPagination({ ...pagination, page: 1 });
   };
 
-  const handleDelete = async (registrantId, registrantName) => {
-    if (!window.confirm(
-      `Are you sure you want to DELETE registrant "${registrantName}"?\n\nThis action CANNOT be undone!`
-    )) {
-      return;
-    }
+  const handleDeleteClick = (registrantId, registrantName) => {
+    setDeleteDialog({ open: true, registrantId, registrantName });
+  };
 
+  const handleDeleteConfirm = async () => {
     try {
       const token = getOwnerToken();
-      await axios.delete(`${API_URL}/admin/registrants/${registrantId}`, {
+      await axios.delete(`${API_URL}/admin/registrants/${deleteDialog.registrantId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       alert('Registrant deleted successfully');
@@ -62,126 +87,161 @@ function OwnerAllRegistrants() {
     } catch (err) {
       console.error('Error deleting registrant:', err);
       alert('Failed to delete registrant');
+    } finally {
+      setDeleteDialog({ open: false, registrantId: null, registrantName: '' });
     }
   };
 
   return (
-    <div className="meetings-container">
-      <div className="page-header">
-        <h1>All Registrants</h1>
-        <button className="btn-primary" onClick={() => navigate('/owner/dashboard')}>
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h4" component="h1" fontWeight="bold">
+          All Registrants
+        </Typography>
+        <Button
+          variant="contained"
+          startIcon={<DashboardIcon />}
+          onClick={() => navigate('/owner/dashboard')}
+        >
           Back to Dashboard
-        </button>
-      </div>
+        </Button>
+      </Box>
 
-      {/* Search */}
-      <div className="filters-section">
-        <div className="search-bar">
-          <input
-            type="text"
-            placeholder="Search by name or email..."
-            value={searchTerm}
-            onChange={handleSearch}
-          />
-        </div>
-      </div>
+      <Paper sx={{ p: 2, mb: 3 }}>
+        <TextField
+          placeholder="Search by name or email..."
+          value={searchTerm}
+          onChange={handleSearch}
+          size="small"
+          fullWidth
+          InputProps={{
+            startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />,
+          }}
+        />
+      </Paper>
 
-      {error && <div className="error-message">{error}</div>}
+      {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
 
       {loading ? (
-        <p>Loading registrants...</p>
+        <Box sx={{ textAlign: 'center', py: 4 }}>
+          <CircularProgress />
+          <Typography sx={{ mt: 2 }}>Loading registrants...</Typography>
+        </Box>
       ) : (
         <>
-          <div className="table-container">
-            <table className="meetings-table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Organization</th>
-                  <th>Meeting</th>
-                  <th>Zoom Status</th>
-                  <th>Registered</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Name</TableCell>
+                  <TableCell>Email</TableCell>
+                  <TableCell>Organization</TableCell>
+                  <TableCell>Meeting</TableCell>
+                  <TableCell>Zoom Status</TableCell>
+                  <TableCell>Registered</TableCell>
+                  <TableCell align="right">Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
                 {registrants.length > 0 ? (
                   registrants.map((registrant) => (
-                    <tr key={registrant._id}>
-                      <td>
-                        <strong>{registrant.firstName} {registrant.lastName}</strong>
-                      </td>
-                      <td>{registrant.email}</td>
-                      <td>
-                        <a
-                          href="#"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            navigate(`/owner/organizations/${registrant.organizationId._id}`);
-                          }}
+                    <TableRow key={registrant._id}>
+                      <TableCell>
+                        <Typography fontWeight="bold">
+                          {registrant.firstName} {registrant.lastName}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>{registrant.email}</TableCell>
+                      <TableCell>
+                        <Link
+                          component="button"
+                          variant="body2"
+                          onClick={() => navigate(`/owner/organizations/${registrant.organizationId._id}`)}
+                          sx={{ textAlign: 'left' }}
                         >
                           {registrant.organizationId.organizationName}
-                        </a>
-                      </td>
-                      <td>{registrant.meetingId?.meetingName || 'N/A'}</td>
-                      <td>
+                        </Link>
+                      </TableCell>
+                      <TableCell>{registrant.meetingId?.meetingName || 'N/A'}</TableCell>
+                      <TableCell>
                         {registrant.syncedToZoom ? (
-                          <span className="status-badge status-active">Synced</span>
+                          <Chip label="Synced" color="success" size="small" />
                         ) : registrant.syncError ? (
-                          <span className="status-badge status-error" title={registrant.syncError}>
-                            Error
-                          </span>
+                          <Chip label="Error" color="error" size="small" title={registrant.syncError} />
                         ) : (
-                          <span className="status-badge status-pending">Pending</span>
+                          <Chip label="Pending" color="default" size="small" />
                         )}
-                      </td>
-                      <td>{new Date(registrant.registeredAt).toLocaleString()}</td>
-                      <td>
-                        <button
-                          className="btn-small btn-danger"
-                          onClick={() => handleDelete(registrant._id, `${registrant.firstName} ${registrant.lastName}`)}
-                          title="Delete Registrant"
+                      </TableCell>
+                      <TableCell>{new Date(registrant.registeredAt).toLocaleString()}</TableCell>
+                      <TableCell align="right">
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          color="error"
+                          onClick={() => handleDeleteClick(registrant._id, `${registrant.firstName} ${registrant.lastName}`)}
                         >
                           Delete
-                        </button>
-                      </td>
-                    </tr>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
                   ))
                 ) : (
-                  <tr>
-                    <td colSpan="7" style={{ textAlign: 'center' }}>
-                      No registrants found
-                    </td>
-                  </tr>
+                  <TableRow>
+                    <TableCell colSpan={7} align="center">
+                      <Typography variant="body2" color="text.secondary">
+                        No registrants found
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
                 )}
-              </tbody>
-            </table>
-          </div>
+              </TableBody>
+            </Table>
+          </TableContainer>
 
-          {/* Pagination */}
           {pagination.pages > 1 && (
-            <div className="pagination">
-              <button
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2, mt: 3 }}>
+              <Button
                 onClick={() => setPagination({ ...pagination, page: pagination.page - 1 })}
                 disabled={pagination.page === 1}
               >
                 Previous
-              </button>
-              <span>
+              </Button>
+              <Typography>
                 Page {pagination.page} of {pagination.pages} ({pagination.total} total)
-              </span>
-              <button
+              </Typography>
+              <Button
                 onClick={() => setPagination({ ...pagination, page: pagination.page + 1 })}
                 disabled={pagination.page === pagination.pages}
               >
                 Next
-              </button>
-            </div>
+              </Button>
+            </Box>
           )}
         </>
       )}
-    </div>
+
+      <Dialog
+        open={deleteDialog.open}
+        onClose={() => setDeleteDialog({ open: false, registrantId: null, registrantName: '' })}
+      >
+        <DialogTitle>Delete Registrant</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to DELETE registrant "{deleteDialog.registrantName}"?
+            <br /><br />
+            <strong>This action CANNOT be undone!</strong>
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialog({ open: false, registrantId: null, registrantName: '' })}>
+            Cancel
+          </Button>
+          <Button onClick={handleDeleteConfirm} color="error" variant="contained">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Container>
   );
 }
 
